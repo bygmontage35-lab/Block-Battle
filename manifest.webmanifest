@@ -1,0 +1,17 @@
+{
+  "name": "BLOCK BATTLE",
+  "short_name": "BLOCK BATTLE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080b20",
+  "theme_color": "#10152d",
+  "description": "Block Battle – gratis blokspil og multiplayer arena",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

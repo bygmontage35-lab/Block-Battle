@@ -1,0 +1,23 @@
+{
+  "name": "block-battle-app-test",
+  "version": "1.5.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "android:init": "npx cap add android",
+    "android:sync": "npx cap sync android",
+    "android:open": "npx cap open android",
+    "check": "node --check server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/android": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

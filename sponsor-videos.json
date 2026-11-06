@@ -1,0 +1,9 @@
+{
+  "videos": [
+    {
+      "sponsor": "Eksempel Sponsor",
+      "src": "ads/sponsor-eksempel.mp4",
+      "enabled": false
+    }
+  ]
+}

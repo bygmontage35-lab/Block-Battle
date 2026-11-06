@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10152d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<title>BLOCK BATTLE – Gold Edition 2.3</title>
+<style>
+:root{--bg:#101426;--panel:#1b2440;--muted:#aeb9d6;--gold:#ffd36b;--mint:#62d6c5}
+*{box-sizing:border-box}
+body{margin:0;background:#080b20;color:#f7f8ff;font-family:system-ui,Arial,sans-serif;min-height:100vh;display:flex;justify-content:center;position:relative;isolation:isolate;overflow-x:hidden;background-size:cover;background-position:center;background-attachment:scroll;transition:background .3s ease}
+body:before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(circle at 12% 18%,#ffffff24 0 1px,transparent 2px),radial-gradient(circle at 76% 28%,#ffffff30 0 1px,transparent 2px),radial-gradient(circle at 42% 72%,#ffffff24 0 1px,transparent 2px),radial-gradient(circle at 88% 82%,#ffffff30 0 1px,transparent 2px);background-size:130px 130px,190px 190px,160px 160px,220px 220px;animation:none}
+body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#080b2040,#080b20aa 75%,#080b20dd)}
+@keyframes starDrift{from{transform:translateY(0)}to{transform:translateY(-130px)}}
+main{width:min(100%,520px);padding:18px 14px 28px;position:relative}
+h1{text-shadow:0 0 10px #00eaff,0 0 26px #a32cff,0 3px 8px #000}
+.stat,.mode,.boss,#stage{backdrop-filter:none;background-color:#10152dcc}
+.stat{box-shadow:0 5px 20px #0005,inset 0 1px #ffffff18}
+.world-theme{font-size:13px;padding:13px;text-shadow:0 2px 5px #000;letter-spacing:2px}
+#stage{background:#080d22d9;border:1px solid #9c69ff;box-shadow:0 0 30px #702cff55,0 18px 50px #0009}
+.instructions{background:#11172dcc;border:1px solid #ffffff20;border-radius:14px;padding:12px}
+h1{text-align:center;letter-spacing:3px;margin:0;font-size:27px}
+.sub{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat{background:var(--panel);border:1px solid #34405f;border-radius:12px;padding:9px;text-align:center}
+.stat small{display:block;color:var(--muted);font-size:10px;letter-spacing:1px}
+.stat strong{font-size:20px}
+#stage{background:#171e34;border:1px solid #34405f;border-radius:18px;padding:9px;box-shadow:0 14px 40px #0005}
+canvas{display:block;width:100%;height:auto;border-radius:10px;touch-action:none}
+#message{text-align:center;color:var(--gold);font-weight:700;min-height:24px;padding:8px 2px 2px;font-size:13px}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+button{border:0;border-radius:12px;background:#303d62;color:white;font-size:20px;font-weight:700;padding:13px 4px;box-shadow:inset 0 1px #ffffff20;touch-action:manipulation}
+button:active{transform:scale(.97);background:#465987}
+button.primary{background:var(--gold);color:#172039;font-size:15px}
+.instructions{color:var(--muted);font-size:12px;line-height:1.5;text-align:center;margin:12px auto 0;max-width:430px}
+.section{margin:14px 0 8px;font-size:13px;letter-spacing:1px;color:var(--gold);font-weight:800}
+.modes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mode{background:#202b49;border:1px solid #435477;border-radius:12px;padding:11px 8px;text-align:left;font-size:13px;min-height:66px}
+.mode span{display:block;color:var(--muted);font-size:11px;font-weight:500;margin-top:4px}
+.mode.selected{outline:2px solid var(--gold);background:#3b3b4c}
+.boss{background:linear-gradient(120deg,#34284d,#202b49);border:1px solid #8f70c5;border-radius:14px;padding:12px;margin-top:12px}
+.boss strong{color:#e5c7ff}.boss p{font-size:12px;color:var(--muted);margin:5px 0 10px;line-height:1.4}
+.challenge-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.challenge-row button{font-size:13px;padding:11px 5px}
+#modeNote{font-size:11px;color:var(--muted);text-align:center;margin:7px 0}
+
+.world-theme{margin:0 auto 12px;text-align:center;font-size:12px;font-weight:900;letter-spacing:1.5px;color:#fff;padding:10px;border-radius:12px;border:1px solid #ffffff55;background:linear-gradient(90deg,#5b2cff,#00cfff,#ff2e93);box-shadow:0 0 22px #00d9ff66;animation:none}
+@keyframes neonPulse{from{filter:saturate(1);box-shadow:0 0 12px #00d9ff55}to{filter:saturate(1.8);box-shadow:0 0 26px #ff2e9388}}
+body{transition:background .3s ease}
+#stage{border-color:#8c65ff;box-shadow:0 0 24px #7a35ff44,0 14px 40px #0008}
+button{border:1px solid #ffffff20}
+.mode.selected{outline:2px solid #00f5ff;box-shadow:0 0 16px #00d9ff66}
+
+.champion-name{font-size:19px!important;font-weight:950;letter-spacing:1.3px;color:#fff!important;margin:6px 0 10px!important;text-shadow:0 0 10px #ff4bd8,0 0 20px #7b5cff}
+.boss>strong{font-size:14px;letter-spacing:1px;color:#ffe66d}
+
+.champion-tagline{font-size:13px!important;line-height:1.5;color:#f0eaff!important;margin:5px 0 10px!important}
+.champion-tagline b{color:#ffe66d}
+
+.hidden{display:none!important}.setup{position:fixed;inset:0;z-index:20;background:#080b20f5;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px}.setup-card{width:min(100%,470px);padding:22px;border-radius:20px;border:1px solid #8065ff;background:#171d38;box-shadow:0 0 45px #713dff55}.setup-card h2{margin:0 0 8px;color:#ffe66d}.setup-card p{color:#c0c9e0;font-size:13px;line-height:1.5}.setup-card label{display:block;font-size:12px;margin:15px 0 6px}.setup-card input,.setup-card select,.arena input{width:100%;padding:12px;background:#0d142c;color:white;border:1px solid #53638b;border-radius:10px;font:inherit}.setup-card button,.arena button{font-size:14px;padding:12px}.setup-card button{width:100%;margin-top:16px}.arena{border:1px solid #586ca6;border-radius:14px;background:#131b38db;padding:12px;margin:12px 0}.arena h3{margin:0 0 8px;font-size:15px;color:#ffe66d}.arena-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.arena .status{font-size:12px;color:#aabce5;line-height:1.5;margin:8px 0}.arena .scoreboard{display:flex;justify-content:space-between;gap:8px;font-size:13px;background:#080e24;border-radius:9px;padding:10px}.arena .scoreboard b{color:#60f3ed}.small-note{font-size:11px;color:#aeb9d6;line-height:1.5}.setup-error{color:#ff8fa2!important}.rotation-hint{font-size:11px;color:#b5c8ff;text-align:center;margin:8px 0}.theme-picker{border:1px solid #53638b;border-radius:14px;background:#101a35;padding:12px;margin:12px 0}.theme-picker h3{margin:0 0 8px;font-size:15px;color:#ffe66d}.theme-picker select,.theme-picker input{width:100%;border:1px solid #53638b;border-radius:9px;background:#0d142c;color:white;padding:10px;font:inherit}.theme-picker p{font-size:12px;color:#b6c5e2;line-height:1.5}.theme-picker button{font-size:13px;margin-top:8px;padding:10px}.theme-preview{height:75px;border-radius:10px;margin:8px 0;background-size:cover;background-position:center;border:1px solid #ffffff44}.ad-slot{border:1px dashed #566283;border-radius:12px;text-align:center;padding:14px;color:#9faaca;font-size:11px;margin-top:15px}
+.match-label{display:block;margin:12px 0 6px;font-size:11px;color:#c9d7f7;font-weight:800;letter-spacing:.7px}.match-select{width:100%;background:#0b1730;color:white;border:1px solid #566fa5;border-radius:9px;padding:11px;font:inherit}.match-search{margin:12px 0;padding:12px;border:1px solid #446bb0;border-radius:12px;background:#0b1a38}.match-search-title{font-size:12px;font-weight:800;color:#8df4ff;margin-bottom:8px}.match-search button{width:100%;margin:5px 0}.search-progress{display:flex;align-items:center;gap:9px;font-size:12px;color:#b6faff;padding:10px 0}.search-spinner{width:16px;height:16px;border:2px solid #366c94;border-top-color:#4ff9ff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.group-scores{font-size:12px;color:#cbdfff;line-height:1.8}.group-scores strong{color:#80f7ed}
+
+/* Version 1.3: compact mobile-first navigation */
+main{width:min(100%,450px);padding:12px 12px 22px}body{align-items:flex-start}
+.app-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:7px 0 11px;border-bottom:1px solid #ffffff25}
+.brand{font-weight:950;letter-spacing:1.2px;font-size:17px;text-shadow:0 0 12px #00dbff}
+.header-actions{display:flex;gap:6px}.header-actions button{font-size:12px;padding:9px 11px;white-space:nowrap}
+.view{display:none}.view.active{display:block}.view h2{margin:8px 0 10px;font-size:21px}.view-intro{color:#b9c8e8;font-size:13px;line-height:1.5;margin:0 0 15px}
+.hero{padding:24px 16px;border:1px solid #6557b4;border-radius:20px;background:radial-gradient(circle at 90% 0%,#5535a655,transparent 55%),#141a35;text-align:center;margin-bottom:14px}
+.hero h2{font-size:28px;margin:0 0 8px;letter-spacing:2px;text-shadow:0 0 18px #00cfff}.hero p{font-size:13px;color:#bac9ed;line-height:1.55}
+.menu-actions{display:grid;gap:9px}.menu-actions button{padding:15px 12px;text-align:left;font-size:15px;background:#222e51}.menu-actions button.primary{background:linear-gradient(105deg,#ffe071,#ffb759);color:#182039}
+.menu-actions button span{display:block;font-size:11px;font-weight:500;margin-top:4px;opacity:.8}
+.section-card{background:#111b35;border:1px solid #405279;border-radius:15px;padding:13px;margin:12px 0}
+.section-card h3{margin:0 0 9px;font-size:15px;color:#ffe27b}.section-card label{display:block;font-size:12px;color:#bac9ed;margin-bottom:7px}
+.section-card select{width:100%;padding:11px;background:#0d142c;color:#fff;border:1px solid #53638b;border-radius:9px}
+#gameView .stats{margin:8px 0}#gameView #stage{padding:6px;border-radius:12px}#gameView .controls{margin-top:7px}#gameView .controls button{padding:10px 4px}#gameView #worldTheme{font-size:10px;padding:7px;margin-bottom:7px}
+#gameView .ad-slot{margin-top:8px;padding:9px}.view .arena{margin:0}.view .theme-picker{margin:0}
+#gameView .instructions{display:none}#gameView .rotation-hint{font-size:10px;margin:6px 0}
+#accountView .account-name{font-size:20px;font-weight:800;color:#fff;overflow-wrap:anywhere}
+.nav-back{font-size:12px;padding:8px 12px;margin-bottom:8px}.footer-note{text-align:center;color:#9ba9cb;font-size:11px;margin-top:16px}
+@media(max-width:390px){.brand{font-size:15px}.header-actions button{font-size:11px;padding:8px 7px}main{padding:9px 9px 20px}}
+
+/* Theme-specific ambient effects. No downloaded images or extra rendering loops. */
+body[data-world="0"] .hero{box-shadow:0 0 34px #9b35ff55,inset 0 0 20px #00eaff1a}
+body[data-world="1"] .hero{box-shadow:0 0 34px #ff83c655,inset 0 0 20px #ffcc801f}
+body[data-world="2"] .hero{box-shadow:0 0 34px #288fff55,inset 0 0 20px #ff35551f}
+body[data-world="3"] .hero{box-shadow:0 0 34px #20e2b255,inset 0 0 20px #ffe18d1f}
+body[data-world="4"] .hero{box-shadow:0 0 34px #ff965555,inset 0 0 20px #fbc0551f}
+body[data-world="5"] .hero{box-shadow:0 0 34px #2dcaff55,inset 0 0 20px #21a1ef1f}
+body[data-world="6"] .hero{box-shadow:0 0 34px #52d89355,inset 0 0 20px #8ee5681f}
+#shopView .menu-actions button{min-height:64px}
+
+/* GOLD EDITION: restrained premium metallic gold on dark obsidian */
+:root{--gold:#f2cf79;--panel:#151923;--bg:#080b12;--muted:#aab0bd}
+body{color:#f7f2e7}
+body:after{background:linear-gradient(180deg,#080b1280,#07090fba 75%,#07090fee)}
+.app-header{border-bottom:1px solid #c9a75d60}
+.brand{color:#f6d887;text-shadow:0 2px 18px #e9b95555;letter-spacing:1.6px}
+.hero{border:1px solid #c9a45d88;background:radial-gradient(circle at 50% 0%,#b88b3c30,transparent 70%),linear-gradient(145deg,#171a25,#10121a);box-shadow:0 18px 42px #0008,inset 0 1px #f5d58e22!important}
+.hero h2{color:#ffe5a3;text-shadow:0 1px 0 #6e4a1b,0 4px 25px #e8b24b66;font-weight:950;letter-spacing:3px}
+.menu-actions button{background:linear-gradient(140deg,#242938,#151a26);border:1px solid #b89a5950;box-shadow:inset 0 1px #ffffff12,0 6px 20px #0005}
+.menu-actions button.primary,button.primary{background:linear-gradient(115deg,#9c702c 0%,#f8e5a4 30%,#d4a94c 60%,#f2d27e 100%);color:#1b160c;border:1px solid #ffe9ac;box-shadow:inset 0 1px #fff9,0 6px 20px #d9a94a30}
+.section-card,.stat{background:linear-gradient(150deg,#191e2b,#11151e);border:1px solid #a58a5659}
+.section-card h3,.stat strong{color:#f2d27e}
+#stage{border:1px solid #c6a45e;box-shadow:0 0 0 1px #e8c46b2a,0 14px 40px #0009}
+.world-theme{background:linear-gradient(100deg,#4d381b,#b18a44,#4d381b);border-color:#e7c57988;box-shadow:0 6px 20px #0005;color:#fff5d4}
+#gameView .dynamite-panel{background:linear-gradient(100deg,#272019,#151821)!important;border-color:#d2a953!important}
+#profileRanking{border-color:#c9a35d8c}
+#profileRanking h3{letter-spacing:1.1px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #f6d782;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+#premiumFairplay{border-color:#cba45c88;background:linear-gradient(150deg,#252018,#10141e)}
+.gold-offers{display:grid;gap:8px;margin:12px 0}
+.gold-offers>div{padding:10px;border:1px solid #c9a76055;border-radius:10px;background:#141820}
+#premiumFairplay button:disabled{opacity:.75;cursor:not-allowed;background:#3d3427;color:#f1d89d;border:1px solid #c9a76088}
+
+.arcade-hall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.arcade-machine{min-width:0;text-align:center;padding:13px 9px;background:linear-gradient(150deg,#2a231a,#101724);border:1px solid #c6a15e88;border-radius:14px}
+.arcade-machine h3{font-size:14px;color:#eac978;margin:6px 0}.arcade-machine p{font-size:12px;min-height:52px}
+.arcade-machine button{width:100%;padding:10px 3px;font-size:12px}.arcade-machine label{font-size:11px}.arcade-machine input{width:100%;accent-color:#d4ad5b}
+.arcade-illustration{font-size:52px;padding:10px;background:radial-gradient(circle,#6c542b66,#111720);border-radius:15px}
+.arcade-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;color:#f1d18a}.arcade-top span{font-size:11px;color:#c3bdaf}
+.arcade-result{min-height:48px;padding:14px;margin-top:12px;border:1px solid #c8a05a88;border-radius:12px;color:#f0d99b;text-align:center}
+.claw-track{display:flex;justify-content:space-around;font-size:19px;margin:7px 0}
+#arcadeInventory>div{padding:7px;border-bottom:1px solid #c5a46644}
+#merchClub{border:1px solid #caa660}#merchClub strong{color:#f0d28c;font-size:23px}
+@media(max-width:650px){.arcade-hall{grid-template-columns:1fr}.arcade-machine p{min-height:0}.arcade-illustration{font-size:42px}}
+
+/* Compact tactical corner dock, only shown in active Royale battles. */
+.attack-dock{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:min(290px,calc(100vw - 20px));z-index:1100;color:#f5dfaa;filter:drop-shadow(0 6px 20px #0009)}
+.attack-dock.hidden{display:none!important}
+.attack-dock-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;border:1px solid #e0bb6d;border-radius:12px 12px 0 0;padding:9px 12px;background:linear-gradient(110deg,#4a3720,#171923);color:#ffdf8d;font-size:13px;font-weight:800;cursor:pointer}
+.attack-dock-panel{padding:10px;background:#121620f2;border:1px solid #b99551;border-top:0;border-radius:0 0 12px 12px;backdrop-filter:blur(12px)}
+.attack-dock-head{display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:11px;margin-bottom:8px}
+#dockCooldown{color:#e5c785;font-size:10px}
+.attack-dock-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.attack-dock-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:65px;padding:7px 2px;border:1px solid #9e824d;border-radius:9px;background:#25231f;color:#f6d99a;font-size:19px;cursor:pointer}
+.attack-dock-actions button b{font-size:10px}.attack-dock-actions button small{font-size:9px}
+.attack-dock-actions button:disabled{opacity:.44;cursor:not-allowed}
+#dockFeedback{font-size:10px;line-height:1.35;margin:8px 0 0;color:#e6d6b3}
+.attack-dock.collapsed{width:180px}.attack-dock.collapsed .attack-dock-panel{display:none}.attack-dock.collapsed .attack-dock-toggle{border-radius:12px}
+@media(max-width:600px){.attack-dock{width:min(235px,calc(100vw - 16px));right:8px;bottom:max(8px,env(safe-area-inset-bottom))}.attack-dock-actions button{min-height:56px}.attack-dock-panel{padding:7px}}
+
+/* v3.0: compact gold status and low-cost effects */
+#topRankBadge{display:flex;gap:5px;align-items:center;background:linear-gradient(120deg,#3a2b17,#161c29);border:1px solid #d3b26b;color:#f8dd9c;padding:8px 9px;font-size:11px;box-shadow:0 2px 8px #0005}
+#topRankNumber{font-weight:900;color:#ffe2a0}#topRankLevel{font-weight:700;opacity:.88}
+.app-header{gap:5px}.header-actions{gap:4px}.header-actions button{font-size:11px;padding:8px 8px}
+.sponsor-panel{border:1px dashed #ad8a4d;border-radius:14px;background:linear-gradient(130deg,#201e1b,#111722);padding:13px;margin:15px 0;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.sponsor-label{font-size:10px;letter-spacing:1.5px;color:#d7b76d;font-weight:800}
+.sponsor-panel strong{font-size:13px;color:#ead4a1}.sponsor-panel p{font-size:11px;color:#b9b7ad;margin:2px 0}
+.sponsor-placeholder{font-size:10px;color:#8c8c87;border:1px solid #665638;padding:5px 10px;border-radius:6px}
+.sponsor-mini{min-height:60px;padding:8px}
+.attack-dock-actions button:not(:disabled):active{transform:scale(.95);border-color:#ffdf86}
+.attack-dock-actions button:not(:disabled){transition:transform .12s ease,border-color .12s ease}
+#dockCooldown{font-variant-numeric:tabular-nums}
+@media(max-width:390px){.brand{font-size:12px;letter-spacing:.4px}.header-actions button{font-size:10px;padding:7px 5px}#topRankBadge{padding:7px 5px;gap:3px}}
+@media(prefers-reduced-motion:reduce){.attack-dock-actions button{transition:none}}
+
+.sponsor-hub-button{display:block;width:100%;margin:10px 0;border:1px solid #c9a65d;color:#f1d69b;background:linear-gradient(115deg,#342918,#171b26);font-size:12px;padding:13px}
+.sponsor-summary{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;padding:14px;margin:12px 0;border:1px solid #bda15f;border-radius:12px;background:#211e19;color:#f4d68d}.sponsor-summary span{font-size:11px;color:#c5c0b3}
+.sponsor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin:12px 0}
+.sponsor-tile{border:1px dashed #9e824e;background:linear-gradient(145deg,#25231f,#141922);border-radius:10px;padding:12px 9px;min-height:95px;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.sponsor-tile .slot-id{font-size:10px;color:#d8b86e;font-weight:800}.sponsor-tile strong{font-size:12px;color:#e4d1a7}.sponsor-tile small{font-size:10px;color:#a9a8a4}
+@media(max-width:420px){.sponsor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Optional pre-game sponsor film. Never obscures an active online match. */
+#preRollOverlay{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;background:#05080df5;padding:14px;color:#f3d79b}
+#preRollOverlay.hidden{display:none!important}
+.pre-roll-card{width:min(560px,100%);padding:15px;border:1px solid #cda85f;border-radius:16px;background:linear-gradient(155deg,#282016,#101826);box-shadow:0 12px 55px #000c}
+.pre-roll-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;font-size:12px;font-weight:800}
+#preRollCountdown{font-variant-numeric:tabular-nums;color:#ffdf8b}
+#preRollVideo{display:block;width:100%;max-height:55vh;aspect-ratio:16/9;object-fit:contain;background:#000;border-radius:10px}
+.pre-roll-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+#preRollSkip{padding:10px 16px;border:1px solid #ddbb73;background:#342819;color:#f7dc9b;border-radius:9px;font-weight:800}
+#preRollSkip:focus-visible{outline:3px solid #fff}
+</style>
+</head>
+<body>
+<div id="setup" class="setup"><div class="setup-card"><h2>🌍 BLOCK BATTLE</h2><p id="setupIntro">Opret din spillerprofil og vælg sprog for at begynde.</p><label id="languageLabel" for="language">Sprog / Language</label><select id="language"><option value="da">🇩🇰 Dansk</option><option value="en">🇬🇧 English</option><option value="de">🇩🇪 Deutsch</option><option value="fr">🇫🇷 Français</option><option value="es">🇪🇸 Español</option><option value="pt">🇧🇷 Português</option><option value="ja">🇯🇵 日本語</option><option value="it">🇮🇹 Italiano</option><option value="nl">🇳🇱 Nederlands</option><option value="sv">🇸🇪 Svenska</option><option value="no">🇳🇴 Norsk</option><option value="pl">🇵🇱 Polski</option><option value="tr">🇹🇷 Türkçe</option><option value="ko">🇰🇷 한국어</option><option value="zh">🇨🇳 中文</option><option value="hi">🇮🇳 हिन्दी</option><option value="ar">🇸🇦 العربية</option></select><label id="nameLabel" for="playerName">Spillernavn</label><input id="playerName" maxlength="20" autocomplete="nickname" placeholder="Dit spillernavn"><label id="countryLabel" for="country">Land</label><select id="country"><option value="DK">🇩🇰 Danmark</option><option value="US">🇺🇸 USA</option><option value="GB">🇬🇧 United Kingdom</option><option value="DE">🇩🇪 Deutschland</option><option value="FR">🇫🇷 France</option><option value="ES">🇪🇸 España</option><option value="BR">🇧🇷 Brasil</option><option value="JP">🇯🇵 日本</option><option value="IT">🇮🇹 Italia</option><option value="NL">🇳🇱 Nederland</option><option value="SE">🇸🇪 Sverige</option><option value="NO">🇳🇴 Norge</option><option value="PL">🇵🇱 Polska</option><option value="TR">🇹🇷 Türkiye</option><option value="KR">🇰🇷 대한민국</option><option value="CN">🇨🇳 中国</option><option value="IN">🇮🇳 भारत</option><option value="OTHER">🌍 Other</option></select><p class="small-note" id="profileNote">Profilen gemmes på denne enhed. Brug ikke dit fulde navn.</p><p id="setupError" class="setup-error" role="alert"></p><button class="primary" id="enterGame">START SPILLET</button></div></div>
+<main id="mainGame" class="hidden">
+<header class="app-header"><div class="brand">⚡ BLOCK BATTLE</div><div class="header-actions"><button id="topRankBadge" type="button" aria-label="Se din rang og dit level" title="Din testserver-rang og dit level"><span id="topRankNumber">#—</span> <span id="topRankLevel">LV 0</span></button><button id="topAccount" type="button">👤 <span data-navtext="account">Konto</span></button><button id="topSettings" type="button">⚙ <span data-navtext="settings">Indstillinger</span></button></div></header>
+<section class="view active" id="homeView"><div class="hero"><h2>BLOCK BATTLE</h2><p id="homeGreeting">Velkommen til arenaen. Vælg din kamp, og lad spillet begynde.</p></div><div class="menu-actions"><button class="primary" id="homePlay">▶ <span data-navtext="play">SPIL NU</span><span id="soloCaption">Spil alene og slå din rekord</span></button><button id="homeMulti">⚔️ <span data-navtext="multi">MULTIPLAYER</span><span id="multiCaption">1v1 · 2v2 · 3v3 · ROYALE 5/10</span></button><button id="homeModes">🎰 <span>SPILTYPER · GOLD ARCADE</span><span id="modesCaption">10 gratis forsøg · Tombola · Klo · Lykkehjulet</span></button><button id="homeLeaderboard">🌍 <span>VERDENSRANGLISTE</span><span>Spillere · rang · level · XP</span></button><button id="homeArcade">👑 <span>UDFORDR VERDENSMESTEREN</span><span>Hien Phuoc Nguyen · The Beast from the East</span></button></div><section class="sponsor-panel" aria-label="Sponsorplads"><span class="sponsor-label">SPONSOR · PLADS LEDIG</span><strong>✦ Din virksomhed i BLOCK BATTLE</strong><p>Her kan en kommende sponsor få logo, navn og link. Ingen sponsor er tilknyttet endnu.</p><span class="sponsor-placeholder">300 × 100 · reklameplads</span></section><button id="homeSponsors" type="button" class="sponsor-hub-button">🤝 SPONSORER & ANNONCEPLADSER · 60 PLADSER</button><p class="footer-note">Gratis grundspil · Kampfordele i udvikling · Ingen betalinger aktiveret</p></section>
+<section class="view" id="sponsorsView"><button class="nav-back" data-back="home">← Menu</button><h2>🤝 SPONSORHALLEN</h2><p class="small-note">60 reserverede pladser til direkte sponsoraftaler og fremtidige Google-annoncer. Alle pladser er ledige i denne demo; ingen annoncekode eller sporing er aktiveret.</p><div class="sponsor-summary"><strong>60 sponsorpladser</strong><span>40 virksomheder · 12 kampagner · 8 Google Ads-reserver</span></div><div class="sponsor-grid" id="sponsorGrid" aria-label="Oversigt over sponsorpladser"></div><p class="small-note">Annoncer vises ikke oven på spillepladen. Eventuelle fremtidige sponsorlinks åbnes kun ved et bevidst klik.</p></section>
+<section class="view" id="gameView"><button class="nav-back" data-back="home">← <span data-navtext="home">Menu</span></button><div id="gameContent"></div></section>
+<section class="view" id="multiView"><button class="nav-back" data-back="home">← <span data-navtext="home">Menu</span></button><h2 data-navtext="multi">Multiplayer</h2><p class="view-intro" id="multiIntro">Vælg kampform, søg efter modstandere, eller spil med en ven via kampkode.</p><div id="multiContent"></div></section>
+<section class="view" id="modesView"><button class="nav-back" data-back="home">← <span data-navtext="home">Menu</span></button><h2 data-navtext="modes">Spiltyper</h2><p class="small-note">Vælg en spiltype med forskellige regler og tempo. Arcade og mesteren ligger nu i deres egne områder.</p><div id="modesContent"></div><button id="openChampion" type="button" style="width:100%;margin-top:12px">👑 UDFORDR MESTEREN (SÆRLIG UDFORDRING)</button><button class="primary" id="modePlay" style="width:100%;margin-top:12px;font-size:15px">▶ <span data-navtext="play">SPIL NU</span></button></section>
+<section class="view" id="championView"><button class="nav-back" data-back="home">← Menu</button><h2>👑 UDFORDR MESTEREN</h2><p class="small-note">Udfordr den fiktive BLOCK BATTLE-verdensmester, Hien Phuoc Nguyen · The Beast from the East.</p><div id="championContent"></div></section><section class="view" id="arcadeView">
+<button class="nav-back" data-back="home">← Menu</button><h2>🎰 SPILTYPER · GOLD ARCADE</h2>
+<p class="small-note">10 gratis forsøg om dagen, fordelt mellem tre maskiner. Præmier er virtuelle testpakker og kan ikke købes eller indløses for penge.</p>
+<div class="section-card"><div class="arcade-top"><strong id="arcadeRemaining">🎟️ 10 / 10 GRATIS SPIL</strong><span id="arcadeReset">Nulstilles ved næste kalenderdag</span></div><div class="arcade-hall">
+<div class="arcade-machine"><div class="arcade-illustration" id="tombolaArt">🎱</div><h3>🎱 TOMBOLA</h3><p>Træk en guldkugle og afslør en præmie.</p><button id="arcadeTombola">TRÆK KUGLE</button></div>
+<div class="arcade-machine"><div class="arcade-illustration" id="clawArt">🕹️</div><h3>🕹️ KLOMASKINE</h3><p>Indstil kloen, og prøv at gribe en gave.</p><label for="clawPosition">Kloens position</label><input id="clawPosition" type="range" min="0" max="100" value="50"><div class="claw-track">🎁 <span>🎁</span> 🎁</div><button id="arcadeClaw">GRIB GAVEN</button></div>
+<div class="arcade-machine"><div class="arcade-illustration" id="wheelArt">🎡</div><h3>🎡 LYKKEHJULET</h3><p>Drej hjulet og se, hvad du får.</p><button id="arcadeWheel">DREJ HJULET</button></div>
+</div><p id="arcadeResult" class="arcade-result" role="status" aria-live="polite">Vælg en maskine for at starte.</p></div>
+<div class="section-card"><h3>🎁 MIN PRÆMIEHYLDE</h3><div id="arcadeInventory">Ingen præmier endnu.</div><p class="small-note">Præmier gemmes kun i denne browser. De kan ikke bruges i onlinekampe endnu. Der er ingen reel vareværdi.</p></div>
+<div class="section-card" id="merchClub"><h3>📦 GOLD MERCH CLUB · KONCEPT</h3><strong>25 kr./måned</strong><p>Idé: ét merchandiseprodukt sendt hver måned til en verificeret leveringsadresse.</p><p class="small-note">Abonnementet er IKKE til salg. Ingen tilmelding, Google-verifikation, adresseindsamling eller betaling er aktiveret. Pris, porto, lande, vareindhold, levering, opsigelse og returregler skal fastlægges før lancering.</p><button disabled>🔒 ABONNEMENT KOMMER SENERE</button></div>
+</section>
+<section class="view" id="settingsView"><button class="nav-back" data-back="home">← <span data-navtext="home">Menu</span></button><h2 data-navtext="settings">Indstillinger</h2><div id="settingsContent"></div><div class="section-card"><h3 data-navtext="language">Sprog</h3><label for="settingsLanguage" data-navtext="languageHint">Vælg sproget i spillet</label><select id="settingsLanguage"></select></div><div class="section-card"><h3>🌐 Online-server</h3><p class="small-note">Indsæt din HTTPS-adresse fra Render, når serveren er lagt online. Dette bruges af mobilappen til multiplayer.</p><label for="onlineServerUrl">Serveradresse</label><input id="onlineServerUrl" type="url" placeholder="https://din-server.onrender.com" autocomplete="url" style="width:100%;padding:12px;background:#11172d;color:white;border:1px solid #526181;border-radius:10px"><button id="saveOnlineServer" type="button" style="width:100%;font-size:14px;margin-top:8px">GEM SERVERADRESSE</button><p id="onlineServerStatus" class="small-note" role="status"></p></div><p class="small-note" id="settingsPrivacy">Egne billeder vises kun på din enhed. Ingen køb eller offentlige uploads.</p></section>
+<section class="view" id="leaderboardView"><button class="nav-back" data-back="home">← Menu</button><h2>🌍 VERDENSRANGLISTE · BETA</h2><p class="small-note">Online oversigt over spillere på samme testserver. Ranglisten er endnu ikke verificeret, og data nulstilles ved servergenstart. I den fremtidige version kan rangkampe tillade betalte kampfordele, som vises tydeligt før kampstart.</p><button id="refreshLeaderboard" type="button">↻ OPDATÉR</button><section class="sponsor-panel sponsor-mini" aria-label="Sponsorplads på ranglisten"><span class="sponsor-label">SPONSOR · PLADS LEDIG</span><p>Synlig sponsorplacering på ranglisten · ingen annonce aktiv</p></section><div class="section-card" id="worldLeaderboard">Opret forbindelse til serveren for at se ranglisten.</div></section><section class="view" id="accountView"><button class="nav-back" data-back="home">← <span data-navtext="home">Menu</span></button><h2 data-navtext="account">Konto</h2><div class="section-card"><div class="account-name" id="accountName">—</div><p class="small-note" id="accountCountry"></p><div id="accountLevel" class="section-card">⭐ Level 0 · 0 XP</div><p class="small-note">500 XP pr. level · 100 XP for hvert fulde minut spillet i en onlinekamp.</p><div class="section-card" id="profileRanking"><h3>🏆 KAMPSTATISTIK & RANG</h3><div id="rankStatus">Rang: Nybegynder</div><div id="rankPlayed">Spillede kampe: 0</div><div id="rankWon">Vundne kampe: 0</div><div id="rankLost">Tabte kampe: 0</div><div id="rankDraw">Uafgjorte: 0</div><div id="rankWinRate">Sejrsprocent: 0 %</div><p class="small-note">Statistikken er foreløbig gemt på denne enhed, ikke en global rangliste.</p></div><p class="small-note" id="accountLocal">Profilen gemmes lokalt på denne enhed. Online login er ikke aktiveret.</p><button id="accountEdit" class="primary" style="width:100%;font-size:14px" data-navtext="edit">REDIGER PROFIL</button></div></section>
+<div id="legacyContent" class="hidden">
+<h1>BLOCK BATTLE</h1>
+<p class="sub">THE GOLD EDITION · VERSION 3.2</p>
+<div id="worldTheme" class="world-theme">🌌 RUMMET · NÆSTE VERDEN OM LIDT</div>
+<div class="arena"><h3 id="arenaTitle">⚔️ MULTIPLAYER · 3 MINUTTER</h3><div id="playerInfo" class="status"></div><div class="scoreboard"><span><span id="youLabel">DIG</span>: <b id="myArenaScore">0</b></span><span><span id="opponentLabel">MODSTANDER</span>: <b id="opponentScore">—</b></span><span>⏱ <b id="arenaClock">03:00</b></span></div><label for="battleFormat" id="battleFormatLabel" class="match-label">VÆLG KAMPTYPE</label><select id="battleFormat" class="match-select"><option value="1v1">⚔️ 1v1 · 2 spillere</option><option value="1v1v1">🏆 1v1v1 · 3 spillere</option><option value="2v2">🤝 2v2 · 4 spillere</option><option value="3v3">🔥 3v3 · 6 spillere</option><option value="royale5">👑 LAST MAN STANDING · 5 spillere</option><option value="royale10">🏆 LAST MAN STANDING · 10 spillere</option></select><div class="match-search"><div class="match-search-title">🔎 <span id="matchSearchTitle">SØG EFTER MODSTANDERE</span></div><div class="search-progress hidden" id="searchProgress"><span class="search-spinner"></span><span id="searchText">Søger efter spillere online…</span></div><button id="searchMatch" class="primary">FIND KAMP</button><button id="cancelSearch" class="hidden">ANNULLER SØGNING</button><p class="small-note" id="searchNote">Gratis for alle. Spillet skal åbnes via den online server.</p></div><div id="groupScores" class="group-scores" aria-live="polite"></div><section class="section-card" id="premiumFairplay"><h3>✦ GOLD KAMPFORDELE · PLANLAGT</h3><p class="small-note">Fremtidige køb kan bruges i både almindelige kampe og rangkampe. Alle får et tydeligt mærke, når kampfordele er tilladt. Ingen betalinger kan gennemføres endnu.</p><div class="gold-offers"><div>🛡️ <b>Skjold</b> – blokerer ét angreb (planlagt)</div><div>🧨 <b>Redningspakke</b> – rydder en del af egen plade (planlagt)</div><div>🌫️ <b>Tåge</b> – skjuler en lille del af modstanderens plade kortvarigt (planlagt)</div></div><p class="small-note">Fair-play: Maks. 1 betalt fordel pr. spiller pr. kamp; ingen gentagne køb, ingen angreb under de første 30 sekunder, og maksimal effekt 3 sekunder. Alle køb skal valideres på serveren.</p><button type="button" disabled aria-disabled="true">🔒 RIGTIGE KØB IKKE AKTIVERET</button></section><section id="battlePowers" class="section-card hidden"><h3>⚡ BATTLE POINTS · <span id="bpCount">0</span> BP</h3><p class="small-note">Optjen BP ved at rydde rækker. De gælder kun i denne kamp. Angreb sendes til en tilfældig aktiv modstander.</p><div class="arena-row"><button id="bpFreeze" type="button">🧊 FRYS · 100 BP</button><button id="bpSlip" type="button">🛼 GLID · 150 BP</button></div><p id="bpInfo" class="small-note">Ingen køb. Maks. ét angreb hvert 12. sekund.</p></section><section id="battleChat" class="section-card" aria-label="Kampchat"><h3>💬 KAMPCHAT</h3><div id="chatMessages" role="log" aria-live="polite" style="max-height:180px;min-height:75px;overflow-y:auto;background:#0c1730;border-radius:10px;padding:10px;font-size:13px;overflow-wrap:anywhere">Chatten åbner, når du deltager i en kamp.</div><form id="chatForm" style="display:flex;gap:7px;margin-top:8px"><input id="chatInput" maxlength="160" autocomplete="off" placeholder="Skriv til spillerne i kampen…" aria-label="Chatbesked" style="min-width:0;flex:1;padding:10px;border-radius:8px;background:#101a32;color:white;border:1px solid #526181"><button id="chatSend" type="submit">SEND</button></form><p class="small-note">Kun deltagere i samme kamp kan se beskederne. Undgå personlige oplysninger. Chat er ikke modereret i testversionen.</p></section><div class="arena-row"><button id="createRoom">OPRET KAMP</button><button id="joinRoom">DELTAG</button></div><button id="shareRoomLink" type="button" class="primary hidden" style="width:100%;margin-top:8px">🔗 DEL INVITATIONSLINK</button><p id="shareRoomHint" class="small-note hidden">Send linket til en ven. Vennen vælger profil og kommer direkte til din kamp.</p><input id="roomCode" maxlength="6" placeholder="KAMPKODE" aria-label="Kampkode" style="margin-top:8px;text-transform:uppercase"><p id="arenaStatus" class="status" role="status">Vælg en kampform og søg efter spillere online.</p><button id="leaveRoom" class="hidden">FORLAD KAMP</button><button id="editProfile" style="margin-top:8px">PROFIL / SPROG</button><p class="small-note" id="multiplayerNote">Alle spiller samtidig på hver sin plade. Klassiske kampe afgøres efter 3 minutter. Royale 5/10 afgøres af sidste overlevende. Battle Points optjenes kun under kampen.</p><p class="small-note" id="friendNote">👥 Venner via Google Play Games og andre konti planlægges til en senere version. Ingen butik og ingen betalinger.</p></div><section class="theme-picker"><h3 id="themeTitle">🎨 SPILLEPLADENS BAGGRUND</h3><select id="boardTheme" aria-label="Spillepladens baggrund"><option value="auto">🌍 Automatisk verdensskift</option><option value="space">🌌 Rummet</option><option value="asia">🌸 Asien</option><option value="usa">🗽 USA</option><option value="europe">🌍 Europa</option><option value="sunset">🌅 Solnedgang</option><option value="ocean">🌊 Havet</option><option value="forest">🌲 Skoven</option><option value="custom">📷 Mit eget billede (forhåndsvisning)</option></select><div id="themePreview" class="theme-preview"></div><div id="customThemeControls" class="hidden"><label for="customImage" id="customImageLabel">Vælg billede fra din enhed</label><input id="customImage" type="file" accept="image/jpeg,image/png,image/webp"><button id="clearImage" type="button">FJERN BILLEDE</button></div><p id="themeInfo">Gratis temaer er klar. Eget billede er kun en privat forhåndsvisning. Betaling og deling med andre spillere kræver en sikker online løsning og billedgodkendelse.</p></section><div class="section" id="chooseModeLabel">VÆLG BANE</div>
+<div class="modes" id="modes">
+ <button class="mode selected" data-mode="classic">🟢 KLASSISK <span>Rolig start · stigende fart</span></button>
+ <button class="mode" data-mode="speed">⚡ SPEED BATTLE <span>Turbo-fald · ekstra hurtig progression</span></button>
+ <button class="mode" data-mode="precision">🎯 PRÆCISION <span>Færre fejl · smal bane</span></button>
+ <button class="mode" data-mode="survival">🔥 OVERLEVELSE <span>Konstant pres · høj fart</span></button>
+</div>
+<div id="modeNote">Klassisk: lær spillet og byg din rekord.</div>
+<div class="stats">
+ <div class="stat"><small>POINT</small><strong id="score">0</strong></div>
+ <div class="stat"><small>NIVEAU</small><strong id="level">1</strong></div>
+ <div class="stat"><small>REKORD</small><strong id="best">0</strong></div>
+</div>
+
+<div id="stage">
+<div class="dynamite-panel" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;margin:0 0 5px;background:#121d38;border:1px solid #395074;border-radius:12px">
+  <div><strong>🧨 DYNAMIT</strong><div id="dynamiteProgress" style="font-size:12px;color:#bcd0ee">0 / 4 rækker</div></div>
+  <button type="button" id="useDynamite" disabled style="padding:10px 14px;border-radius:10px;font-weight:bold">🧨 RYD PLADEN</button>
+ </div>
+
+ <canvas id="game" width="384" height="640" aria-label="Block Battle spillebræt"></canvas>
+ <div id="message">Blokken falder snart – gør dig klar!</div>
+</div>
+<div class="boss">
+ <strong>👑 VERDENSMESTEREN FRA DANMARK</strong>
+ <p class="champion-name">HIEN PHUOC NGUYEN</p>
+ <p class="champion-tagline">Tør du udfordre en legende inden for <b>Block Battle World Champions</b> – aka <b>“The Beast from the East”</b>?</p>
+ <div id="bossScore" style="font-size:12px;color:#ffd36b;margin:6px 0">UDFORDRINGER MOD MESTEREN: 0</div>
+ <div class="challenge-row"><button data-act="boss">UDFORDR THE BEAST</button><button data-act="invite">INVITÉR EN VEN</button></div>
+</div>
+<div class="controls">
+ <button data-act="left" aria-label="Venstre">◀</button>
+ <button data-act="rotate" aria-label="Drej">⟳</button>
+ <button data-act="right" aria-label="Højre">▶</button>
+ <button data-act="down" aria-label="Hurtigere ned">▼</button>
+</div>
+<div class="controls">
+ <button class="primary" data-act="drop" style="grid-column:span 2">SLIP BLOKKEN</button>
+ <button class="primary" data-act="restart" style="grid-column:span 2">START FORFRA</button>
+</div>
+<p class="rotation-hint" id="rotationHint">⟳ Tryk på brikken eller drejeknappen: 90° pr. tryk, 4 tryk = 360°. Brug ⤓ for at slippe.</p><div class="ad-slot" id="adSlot">ANNONCEPLADS · Ingen reklamer aktiveret</div><p class="instructions" id="instructions">Computer: ← → flyt · ↑ drej 90° med uret (fire tryk = 360°) · ↓ hurtigere · mellemrum slip helt ned.<br>Tryk direkte på den faldende blok for at dreje den 90° (fire tryk = 360°). Mobil: Tryk på blokken for at dreje, eller brug knapperne. Brug slip-knappen for at lade den falde helt ned. Ryd hele rækker eller kolonner for point. Mindre klodser og flere felter. Baggrunden skifter mellem rum, Asien, USA og Europa. Online multiplayer bruger BLOCK BATTLE-serveren.</p>
+</div></main>
+
+<aside id="attackDock" class="attack-dock hidden" aria-label="Hurtige angreb">
+<button id="attackDockToggle" class="attack-dock-toggle" type="button" aria-expanded="true" aria-controls="attackDockPanel">⚡ ANGREB <span id="dockBP">0 BP</span></button>
+<div id="attackDockPanel" class="attack-dock-panel">
+<div class="attack-dock-head"><strong>⚔️ HURTIGANGREB</strong><span id="dockCooldown" role="status">Klar</span></div>
+<div class="attack-dock-actions">
+<button id="dockFreeze" type="button" title="Frys modstander i 2 sekunder">🧊 <b>FRYS</b><small>100 BP</small></button>
+<button id="dockSlip" type="button" title="Få modstanderens brikker til at glide i 4 sekunder">🛼 <b>GLID</b><small>150 BP</small></button>
+<button type="button" disabled title="Betalt kampfordel er endnu ikke tilgængelig">🔒 <b>SKJOLD</b><small>Kommer senere</small></button>
+</div>
+<p id="dockFeedback" role="status" aria-live="polite">Optjen BP ved at rydde rækker. Ingen betalinger.</p>
+</div>
+</aside>
+<div id="preRollOverlay" class="hidden" role="dialog" aria-modal="true" aria-label="Reklame før spillet" aria-hidden="true">
+ <div class="pre-roll-card"><div class="pre-roll-top"><span>REKLAME · SPONSORFILM</span><span id="preRollCountdown">Maks. 10 sek.</span></div>
+ <video id="preRollVideo" playsinline muted preload="none" aria-label="Kort sponsorreklame"></video>
+ <div class="pre-roll-bottom"><span id="preRollSponsor" class="small-note">Annonce</span><button id="preRollSkip" type="button">SPRING OVER →</button></div></div>
+</div>
+<script>
+(() => {
+const canvas=document.getElementById('game'), ctx=canvas.getContext('2d',{alpha:false});
+const COLS=12, ROWS=20, SIZE=32;
+const COLORS=['#00f5ff','#ffe600','#b44cff','#ff2e93','#38ff62','#ff6b22','#ffffff'];
+const SHAPES=[
+ [[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]],
+ [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]],
+ [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]]
+];
+let board, piece, score, level, best, dropTimer, lastTime, running, gameOver, message;
+let mode='classic', bossChallenge=false, challengeCode='';
+let battlePoints=0,attackCooldown=0,freezeUntil=0,slipUntil=0,royaleEliminated=false;
+let dynamiteLines=0, dynamiteUses=0, dynamiteReady=false;
+let profile=null,lang='da',match=null,channel=null,matchStart=0,matchTimer=null,opponent=null,localFinished=false,matchEnded=false;
+const CFG=window.BLOCK_BATTLE_CONFIG||{};let sb=null;
+try{if(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase)sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey)}catch(e){console.warn('Online setup:',e)}
+let bossChallenges=Number(localStorage.getItem('bbBossChallenges')||0);
+const $=id=>document.getElementById(id);
+const worlds=[
+ {name:'🌌 RUMMET',bg:'radial-gradient(ellipse at 18% 12%,#9b35ff99 0%,transparent 36%),radial-gradient(ellipse at 85% 75%,#00d9ff66 0%,transparent 38%),linear-gradient(135deg,#090b2b,#171044 52%,#050817)',board:'#11132b',cell:'#202044'},
+ {name:'🌸 ASIEN',bg:'radial-gradient(ellipse at 80% 10%,#ff5c9aaa 0%,transparent 38%),radial-gradient(ellipse at 12% 80%,#ffb34766 0%,transparent 35%),linear-gradient(135deg,#351039,#702454 55%,#160d2b)',board:'#29142e',cell:'#482044'},
+ {name:'🗽 USA',bg:'radial-gradient(ellipse at 50% 0%,#168cffaa 0%,transparent 40%),radial-gradient(ellipse at 90% 80%,#ff244e55 0%,transparent 32%),linear-gradient(135deg,#071b45,#18245a 55%,#080d24)',board:'#111b38',cell:'#1d3155'},
+ {name:'🌍 EUROPA',bg:'radial-gradient(ellipse at 30% 0%,#00e0b0aa 0%,transparent 40%),radial-gradient(ellipse at 90% 80%,#ffd34d55 0%,transparent 34%),linear-gradient(135deg,#062b35,#15515a 55%,#071923)',board:'#102b35',cell:'#19414b'},
+ {name:'🌅 SOLNEDGANG',bg:'linear-gradient(145deg,#61234f,#f1844c,#3c285b)',board:'#49213c',cell:'#6a3455'},
+ {name:'🌊 HAVET',bg:'linear-gradient(145deg,#061e4c,#027e9e,#04223d)',board:'#0a2947',cell:'#13415d'},
+ {name:'🌲 SKOVEN',bg:'linear-gradient(145deg,#081f1c,#267452,#071e25)',board:'#112f2b',cell:'#205042'}
+];
+let worldIndex=0, boardTheme=localStorage.getItem('bbBoardTheme')||'auto', customBitmap=null, customUrl=null, boardDirty=true;
+const themeIds={space:0,asia:1,usa:2,europe:3,sunset:4,ocean:5,forest:6};
+function invalidate(){boardDirty=true}
+function activeTheme(){return boardTheme==='auto'?worldIndex:(themeIds[boardTheme]??worldIndex)}
+function applyWorld(){const w=worlds[activeTheme()];document.body.style.background=w.bg;document.body.dataset.world=String(activeTheme());$('worldTheme').textContent=w.name; $('themePreview').style.background=w.bg; if(boardTheme==='custom'&&customUrl){$('themePreview').style.background='center / cover url('+JSON.stringify(customUrl)+')'}invalidate()}
+function changeWorld(){
+ // Et nyt automatisk tema ved hver NY kamp – aldrig midt under en kamp.
+ if(boardTheme!=='auto')return;
+ const step=1+Math.floor(Math.random()*(worlds.length-1));
+ worldIndex=(worldIndex+step)%worlds.length;
+ applyWorld();
+}
+function refreshCustomControls(){$('customThemeControls').classList.toggle('hidden',boardTheme!=='custom')}
+$('boardTheme').value=boardTheme;
+if(!$('boardTheme').value)boardTheme='auto';
+$('boardTheme').addEventListener('change',()=>{boardTheme=$('boardTheme').value;localStorage.setItem('bbBoardTheme',boardTheme);refreshCustomControls();applyWorld()});
+$('customImage').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>3*1024*1024){alert('Vælg JPG, PNG eller WebP under 3 MB.');e.target.value='';return}
+ const next=URL.createObjectURL(file);
+ try{const bitmap=await createImageBitmap(file,{resizeWidth:384,resizeHeight:640,resizeQuality:'medium'});if(customBitmap)customBitmap.close();customBitmap=bitmap;if(customUrl)URL.revokeObjectURL(customUrl);customUrl=next;applyWorld()}catch(err){URL.revokeObjectURL(next);alert('Billedet kunne ikke åbnes.')}
+});
+$('clearImage').addEventListener('click',()=>{if(customBitmap)customBitmap.close();customBitmap=null;if(customUrl)URL.revokeObjectURL(customUrl);customUrl=null;$('customImage').value='';applyWorld()});
+refreshCustomControls();applyWorld();
+best=Number(localStorage.getItem('bbFallingBest')||0);
+function freshBoard(){return Array.from({length:ROWS},()=>Array(COLS).fill(null))}
+function randomPiece(){
+ const shape=SHAPES[Math.floor(Math.random()*SHAPES.length)].map(row=>row.slice());
+ return {shape,x:Math.floor((COLS-shape[0].length)/2),y:0,color:COLORS[Math.floor(Math.random()*COLORS.length)]};
+}
+function reset(){
+ changeWorld();
+
+ dynamiteLines=0;dynamiteUses=0;dynamiteReady=false;
+ board=freshBoard(); score=0; level=1; dropTimer=0; lastTime=0; running=true; gameOver=false;
+ piece=randomPiece(); message=bossChallenge?'HIEN PHUOC NGUYEN udfordrer dig!':'Fyld vandrette rækker – så falder brikkerne ned!';
+ updateStats(); draw();
+}
+function dynamiteTarget(){return 4+3*dynamiteUses}
+function updateDynamiteUI(){
+ const progress=$('dynamiteProgress'),button=$('useDynamite');
+ if(!progress||!button)return;
+ progress.textContent=dynamiteReady?'KLAR! Brug dynamitten når du vil.':dynamiteLines+' / '+dynamiteTarget()+' rækker · næste dynamit';
+ button.disabled=!dynamiteReady||!running||gameOver;
+ button.style.opacity=button.disabled?'.5':'1';
+}
+function useDynamite(){
+ if(!dynamiteReady||!running||gameOver)return;
+ board=freshBoard();
+ // Behold aktiv brik, score, niveau og kamptid.
+ dynamiteReady=false;dynamiteLines=0;dynamiteUses++;
+ message='🧨 BOOM! Hele pladen er ryddet. Næste dynamit: '+dynamiteTarget()+' rækker.';
+ updateStats();draw();sendScore();
+}
+$('useDynamite').addEventListener('click',useDynamite);
+function updateStats(){
+ updateDynamiteUI();
+ $('score').textContent=score; $('level').textContent=level; $('best').textContent=best;$('myArenaScore').textContent=score;
+}
+function collides(p,dx=0,dy=0,shape=p.shape){
+ for(let y=0;y<shape.length;y++)for(let x=0;x<shape[y].length;x++)if(shape[y][x]){
+  const bx=p.x+x+dx, by=p.y+y+dy;
+  if(bx<0||bx>=COLS||by>=ROWS) return true;
+  if(by>=0&&board[by][bx]) return true;
+ }
+ return false;
+}
+function move(dx,dy){
+ if(!running||gameOver||Date.now()<freezeUntil)return false;
+ if(Date.now()<slipUntil&&dx!==0)dx*=2;
+ if(!collides(piece,dx,dy)){piece.x+=dx;piece.y+=dy;draw();return true}
+ return false;
+}
+function rotate(){
+ if(!running||gameOver||!piece||Date.now()<freezeUntil)return false;
+ // 90° med uret pr. tryk. 4 tryk = 360°, og det kan gentages uden grænse.
+ const rotated=piece.shape[0].map((_,x)=>piece.shape.map(row=>row[x]).reverse());
+ // Wall kicks: prøv små forskydninger både til siden og opad,
+ // så rotation også virker tæt ved vægge og gulv.
+ for(const [dx,dy] of [[0,0],[-1,0],[1,0],[-2,0],[2,0],[-3,0],[3,0],[0,-1],[-1,-1],[1,-1],[-2,-1],[2,-1],[0,-2]]){
+  if(!collides(piece,dx,dy,rotated)){
+   piece.x+=dx;piece.y+=dy;piece.shape=rotated;
+   draw();return true;
+  }
+ }
+ return false; // Vent til der igen er plads til at dreje.
+}
+function lockPiece(){
+ piece.shape.forEach((row,y)=>row.forEach((v,x)=>{if(v&&piece.y+y>=0)board[piece.y+y][piece.x+x]=piece.color}));
+ clearLines();
+ piece=randomPiece();
+ if(collides(piece)){endGame();return}
+ draw();
+}
+function clearLines(){
+ // Fjern alle fyldte vandrette rækker på én gang.
+ // Behold rækkernes rækkefølge, og indsæt tomme rækker øverst,
+ // så alle eksisterende brikker ovenover falder ned.
+ const remaining=board.filter(row=>!row.every(Boolean));
+ const removed=ROWS-remaining.length;
+ if(!removed){message='Fyld en vandret række for at få mere plads!';return}
+ board=Array.from({length:removed},()=>Array(COLS).fill(null)).concat(remaining);
+ // Beløn flere rækker fjernet i samme placering.
+ score+=100*removed+50*removed*(removed-1);
+ if(match&&isRoyale()&&!royaleEliminated){battlePoints=Math.min(500,battlePoints+removed*40);updateBattlePoints()}
+ if(!dynamiteReady){
+  dynamiteLines+=removed;
+  if(dynamiteLines>=dynamiteTarget()){dynamiteReady=true;dynamiteLines=dynamiteTarget();}
+ }
+ const nextLevel=1+Math.floor(score/500);
+ if(nextLevel>level){level=nextLevel;message='NIVEAU '+level+'! Blokkene falder hurtigere!'}
+ else message='BOOM! '+removed+' vandret'+(removed===1?' række':'te rækker')+' ryddet – brikkerne falder ned!';
+ if(score>best){best=score;localStorage.setItem('bbFallingBest',String(best))}
+ updateStats();
+}
+function hardDrop(){
+ if(!running||gameOver)return;
+ let distance=0;while(!collides(piece,0,1)){piece.y++;distance++}
+ score+=distance;updateStats();lockPiece();
+}
+function endGame(){
+ if(gameOver)return;
+ gameOver=true;running=false;updateDynamiteUI();localFinished=true;
+ message=isRoyale()&&match?'☠️ ELIMINERET · Se hvem der vinder!':'SPILLET ER SLUT! Tryk START FORFRA.';sendScore();if(isRoyale()&&match&&!royaleEliminated){royaleEliminated=true;wsSend('eliminated');}draw();
+}
+function drawCell(x,y,color,alpha=1){
+ const px=x*SIZE,py=y*SIZE;
+ ctx.globalAlpha=alpha;ctx.fillStyle=color;ctx.fillRect(px+2,py+2,SIZE-4,SIZE-4);
+ ctx.fillStyle='#ffffff30';ctx.fillRect(px+5,py+5,SIZE-10,5);
+ ctx.strokeStyle='#ffffff35';ctx.lineWidth=1;ctx.strokeRect(px+2.5,py+2.5,SIZE-5,SIZE-5);
+ ctx.globalAlpha=1;
+}
+function draw(){
+ if(document.hidden){invalidate();return}
+ const w=worlds[activeTheme()];
+ ctx.fillStyle=w.board;ctx.fillRect(0,0,canvas.width,canvas.height);
+ if(boardTheme==='custom'&&customBitmap){ctx.globalAlpha=.33;ctx.drawImage(customBitmap,0,0,canvas.width,canvas.height);ctx.globalAlpha=1}
+
+ for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+  ctx.fillStyle=w.cell;ctx.globalAlpha=boardTheme==='custom'&&customBitmap?.4:1;ctx.fillRect(x*SIZE+1,y*SIZE+1,SIZE-2,SIZE-2);ctx.globalAlpha=1;
+  if(board[y][x])drawCell(x,y,board[y][x]);
+ }
+ if(piece){
+  // Ingen landingsskygge: kun den aktive blok vises.
+  piece.shape.forEach((row,y)=>row.forEach((v,x)=>{if(v&&piece.y+y>=0)drawCell(piece.x+x,piece.y+y,piece.color)}));
+ }
+ if(gameOver){
+  ctx.fillStyle='#080d1bd9';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 28px system-ui';ctx.fillText('SPILLET ER SLUT',192,300);
+  ctx.font='16px system-ui';ctx.fillText('Din score: '+score,192,334);
+ }
+ $('message').textContent=message;boardDirty=false;
+}
+function frame(t){
+ if(!lastTime)lastTime=t;
+ const dt=Math.min(80,Math.max(0,t-lastTime));lastTime=t;
+ if(match&&matchStart&&Date.now()>=matchStart+180000&&!matchEnded&&!isRoyale()){finishMatch()}
+ if(document.hidden){lastTime=0;requestAnimationFrame(frame);return}
+ if(boardDirty&&board)draw();
+ if(running&&!gameOver){
+  dropTimer+=dt;
+  const base={classic:1450,speed:620,precision:1650,survival:1250}[mode];
+  const interval=Math.max(mode==='speed'?170:420,base-(level-1)*({classic:45,speed:75,precision:35,survival:50}[mode]));
+  if(dropTimer>=interval){dropTimer%=interval;if(!move(0,1))lockPiece()}
+ }
+ requestAnimationFrame(frame);
+}
+const modeDescriptions={classic:'Klassisk: lær spillet og byg din rekord.',speed:'Speed Battle: turbo-fald fra start og hurtigere stigning i sværhedsgrad.',precision:'Præcision: mere tid til at planlægge dine træk.',survival:'Overlevelse: konstant pres og høj fart.'};
+function updateModeButtons(){
+ document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('selected',b.dataset.mode===mode));
+ $('modeNote').textContent=modeDescriptions[mode];
+}
+document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{
+ if(match&&matchStart&&!matchEnded)return;mode=btn.dataset.mode;bossChallenge=false;updateModeButtons();reset();
+}));
+function inviteFriend(){
+ challengeCode=Math.random().toString(36).slice(2,8).toUpperCase();
+ const invite='Jeg udfordrer dig i BLOCK BATTLE! Udfordringskode: '+challengeCode+' · Bane: '+mode+' · Åbn spillet: '+location.href.split('?')[0]+'?challenge='+challengeCode;
+ if(navigator.share){navigator.share({title:'BLOCK BATTLE challenge',text:invite}).catch(()=>{});}
+ else if(navigator.clipboard){navigator.clipboard.writeText(invite).then(()=>{message='Udfordringen er kopieret – send den til din ven!';draw()}).catch(()=>{message=invite;draw()});}
+ else {message=invite;draw()}
+}
+document.querySelectorAll('button[data-act]').forEach(btn=>{
+ const act=btn.dataset.act;
+ const run=()=>{
+  if(act==='left')move(-1,0);
+  if(act==='right')move(1,0);
+  if(act==='down'){if(!move(0,1))lockPiece()}
+  if(act==='rotate')rotate();
+  if(act==='drop')hardDrop();
+  if(act==='restart'){if(match&&matchStart&&!matchEnded){message='Du kan ikke genstarte under en onlinekamp.';draw()}else{bossChallenge=false;reset()}}
+  if(act==='boss'){bossChallenges++;localStorage.setItem('bbBossChallenges',String(bossChallenges));$('bossScore').textContent='UDFORDRINGER MOD MESTEREN: '+bossChallenges;bossChallenge=true;mode='survival';updateModeButtons();reset();message='HIEN PHUOC NGUYEN: Du har udfordret mesteren!';}
+  if(act==='invite')inviteFriend();
+ };
+ btn.addEventListener('click',run);
+});
+document.addEventListener('keydown',e=>{
+ if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
+ if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' '].includes(e.key))e.preventDefault();
+ if(e.key==='ArrowLeft')move(-1,0);
+ if(e.key==='ArrowRight')move(1,0);
+ if(e.key==='ArrowDown'){if(!move(0,1))lockPiece()}
+ if(e.key==='ArrowUp')rotate();
+ if(e.key===' ')hardDrop();
+ if(e.key.toLowerCase()==='r'&&!(match&&matchStart&&!matchEnded))reset();
+});
+
+// Mobil: Tryk direkte på den faldende brik for at rotere 90°.
+// Fire tryk giver en hel 360° rotation. Brug ⤓-knappen for at slippe brikken.
+canvas.addEventListener('pointerdown', e => {
+ if(!running||gameOver||!piece)return;
+ const rect=canvas.getBoundingClientRect();
+ const col=Math.floor((e.clientX-rect.left)*canvas.width/rect.width/SIZE);
+ const row=Math.floor((e.clientY-rect.top)*canvas.height/rect.height/SIZE);
+ const x=col-piece.x, y=row-piece.y;
+ if(y>=0&&y<piece.shape.length&&x>=0&&x<piece.shape[y].length&&piece.shape[y][x]){
+  e.preventDefault();
+  rotate();
+ }
+});
+// Profil, internationalisering og online arena.
+const translations={
+ it:{"intro": "Crea il tuo profilo e scegli la lingua.", "name": "Nome giocatore", "country": "Paese", "start": "INIZIA", "create": "CREA PARTITA", "join": "ENTRA", "leave": "ESCI", "edit": "PROFILO / LINGUA", "you": "TU", "opp": "AVVERSARIO", "arena": "⚔️ MULTIGIOCATORE · 3 MINUTI", "mode": "SCEGLI MODALITÀ", "themeTitle": "SFONDO DEL TABELLONE", "customImageLabel": "Scegli un’immagine dal dispositivo", "clearImage": "RIMUOVI IMMAGINE", "themeInfo": "Temi gratuiti. Le immagini personali sono solo un’anteprima privata; pagamenti e condivisione richiedono un servizio online sicuro."},
+ nl:{"intro": "Maak je profiel en kies een taal.", "name": "Spelersnaam", "country": "Land", "start": "START SPEL", "create": "MAAK SPEL", "join": "DEELNEMEN", "leave": "VERLATEN", "edit": "PROFIEL / TAAL", "you": "JIJ", "opp": "TEGENSTANDER", "arena": "⚔️ MULTIPLAYER · 3 MINUTEN", "mode": "KIES MODUS", "themeTitle": "SPEELVELD ACHTERGROND", "customImageLabel": "Kies een afbeelding", "clearImage": "AFBEELDING WISSEN", "themeInfo": "Gratis thema’s. Eigen foto is alleen een privévoorbeeld; betaling en delen vereisen een veilige online dienst."},
+ sv:{"intro": "Skapa profil och välj språk.", "name": "Spelarnamn", "country": "Land", "start": "STARTA", "create": "SKAPA MATCH", "join": "GÅ MED", "leave": "LÄMNA", "edit": "PROFIL / SPRÅK", "you": "DU", "opp": "MOTSTÅNDARE", "arena": "⚔️ MULTIPLAYER · 3 MINUTER", "mode": "VÄLJ LÄGE", "themeTitle": "SPELPLANENS BAKGRUND", "customImageLabel": "Välj bild", "clearImage": "TA BORT BILD", "themeInfo": "Gratis teman. Egna bilder är endast privata förhandsvisningar tills säker betalning och moderering finns."},
+ no:{"intro": "Opprett profil og velg språk.", "name": "Spillernavn", "country": "Land", "start": "START SPILL", "create": "OPPRETT KAMP", "join": "BLI MED", "leave": "FORLAT", "edit": "PROFIL / SPRÅK", "you": "DU", "opp": "MOTSTANDER", "arena": "⚔️ FLERSPILLER · 3 MINUTTER", "mode": "VELG MODUS", "themeTitle": "BAKGRUNN FOR BRETT", "customImageLabel": "Velg bilde", "clearImage": "FJERN BILDE", "themeInfo": "Gratis temaer. Eget bilde er bare privat forhåndsvisning; betaling og deling krever sikker nettjeneste."},
+ pl:{"intro": "Utwórz profil i wybierz język.", "name": "Nazwa gracza", "country": "Kraj", "start": "GRAJ", "create": "UTWÓRZ MECZ", "join": "DOŁĄCZ", "leave": "WYJDŹ", "edit": "PROFIL / JĘZYK", "you": "TY", "opp": "RYWAL", "arena": "⚔️ MULTIPLAYER · 3 MINUTY", "mode": "WYBIERZ TRYB", "themeTitle": "TŁO PLANSZY", "customImageLabel": "Wybierz zdjęcie", "clearImage": "USUŃ ZDJĘCIE", "themeInfo": "Darmowe motywy. Własne zdjęcie to prywatny podgląd; płatności i udostępnianie wymagają bezpiecznej usługi."},
+ tr:{"intro": "Profil oluştur ve dil seç.", "name": "Oyuncu adı", "country": "Ülke", "start": "OYNA", "create": "MAÇ OLUŞTUR", "join": "KATIL", "leave": "AYRIL", "edit": "PROFİL / DİL", "you": "SEN", "opp": "RAKİP", "arena": "⚔️ ÇOK OYUNCULU · 3 DAKİKA", "mode": "MOD SEÇ", "themeTitle": "OYUN TAHTASI ARKA PLANI", "customImageLabel": "Resim seç", "clearImage": "RESMİ SİL", "themeInfo": "Ücretsiz temalar. Kendi resminiz yalnızca özel önizlemedir; ödeme ve paylaşım güvenli çevrimiçi sistem gerektirir."},
+ ko:{"intro": "프로필을 만들고 언어를 선택하세요.", "name": "플레이어 이름", "country": "국가", "start": "게임 시작", "create": "대전 만들기", "join": "참가", "leave": "나가기", "edit": "프로필 / 언어", "you": "나", "opp": "상대", "arena": "⚔️ 멀티플레이 · 3분", "mode": "모드 선택", "themeTitle": "게임판 배경", "customImageLabel": "이미지 선택", "clearImage": "이미지 삭제", "themeInfo": "무료 테마를 사용할 수 있습니다. 개인 사진은 비공개 미리보기이며 결제와 공개 공유는 별도 보안 시스템이 필요합니다."},
+ zh:{"intro": "创建个人资料并选择语言。", "name": "玩家名称", "country": "国家", "start": "开始游戏", "create": "创建比赛", "join": "加入", "leave": "离开", "edit": "资料 / 语言", "you": "你", "opp": "对手", "arena": "⚔️ 多人游戏 · 3分钟", "mode": "选择模式", "themeTitle": "棋盘背景", "customImageLabel": "选择图片", "clearImage": "删除图片", "themeInfo": "提供免费主题。个人图片仅供私人预览；付费和公开分享需要安全的在线系统。"},
+ hi:{"intro": "प्रोफ़ाइल बनाएँ और भाषा चुनें।", "name": "खिलाड़ी का नाम", "country": "देश", "start": "खेल शुरू करें", "create": "मैच बनाएँ", "join": "शामिल हों", "leave": "छोड़ें", "edit": "प्रोफ़ाइल / भाषा", "you": "आप", "opp": "प्रतिद्वंद्वी", "arena": "⚔️ मल्टीप्लेयर · 3 मिनट", "mode": "मोड चुनें", "themeTitle": "बोर्ड की पृष्ठभूमि", "customImageLabel": "चित्र चुनें", "clearImage": "चित्र हटाएँ", "themeInfo": "मुफ़्त थीम उपलब्ध हैं। निजी तस्वीर केवल निजी पूर्वावलोकन है; भुगतान और साझा करने के लिए सुरक्षित ऑनलाइन सेवा चाहिए।"},
+ ar:{"intro": "أنشئ ملفك واختر اللغة.", "name": "اسم اللاعب", "country": "البلد", "start": "ابدأ اللعب", "create": "إنشاء مباراة", "join": "انضم", "leave": "غادر", "edit": "الملف / اللغة", "you": "أنت", "opp": "الخصم", "arena": "⚔️ لعب جماعي · ٣ دقائق", "mode": "اختر الوضع", "themeTitle": "خلفية لوحة اللعب", "customImageLabel": "اختر صورة", "clearImage": "حذف الصورة", "themeInfo": "تتوفر خلفيات مجانية. صورتك للمعاينة الخاصة فقط؛ الدفع والمشاركة العامة يحتاجان إلى نظام آمن."},
+ da:{intro:'Opret din spillerprofil og vælg sprog for at begynde.',name:'Spillernavn',country:'Land',start:'START SPILLET',profile:'Profilen gemmes på denne enhed. Brug ikke dit fulde navn.',create:'OPRET KAMP',join:'DELTAG',leave:'FORLAD KAMP',edit:'PROFIL / SPROG',you:'DIG',opp:'MODSTANDER',arena:'⚔️ MULTIPLAYER · 3 MINUTTER',mode:'VÆLG BANE',wait:'Venter på en modstander. Del kampkoden:',ready:'To spillere er klar. Kampen starter om 3 sekunder!',offline:'Vælg en kampform og søg efter spillere online.',code:'Skriv en kampkode på 6 tegn.',error:'Kunne ikke forbinde. Kontrollér internet og Supabase.',winner:'DU VANDT!',loser:'MODSTANDEREN VANDT',draw:'UAFGJORT',rot:'⟳ Tryk på brikken eller drejeknappen: 90° pr. tryk, 4 tryk = 360°. Brug ⤓ for at slippe.',ad:'ANNONCEPLADS · Ingen reklamer aktiveret',note:'To spillere, hver sin spilleplade, samme starttid. Flest point efter 3 minutter vinder.',invalid:'Skriv et spillernavn på 2–20 tegn.'},
+ en:{intro:'Create your player profile and choose a language.',name:'Player name',country:'Country',start:'START GAME',profile:'Your profile is saved on this device. Avoid using your full name.',create:'CREATE MATCH',join:'JOIN',leave:'LEAVE MATCH',edit:'PROFILE / LANGUAGE',you:'YOU',opp:'OPPONENT',arena:'⚔️ MULTIPLAYER · 3 MINUTES',mode:'CHOOSE MODE',wait:'Waiting for an opponent. Share room code:',ready:'Two players ready. Match starts in 3 seconds!',offline:'Online matches need Supabase configuration. Solo play works now.',code:'Enter a 6-character room code.',error:'Could not connect. Check internet and Supabase.',winner:'YOU WIN!',loser:'OPPONENT WINS',draw:'DRAW',rot:'⟳ Tap the piece or rotate button: 90° per tap, 4 taps = 360°.',ad:'AD SPACE · Ads not enabled',note:'Two players, separate boards, same start. Highest score after 3 minutes wins.',invalid:'Enter a player name of 2–20 characters.'},
+ de:{intro:'Erstelle dein Profil und wähle eine Sprache.',name:'Spielername',country:'Land',start:'SPIEL STARTEN',profile:'Profil wird auf diesem Gerät gespeichert.',create:'SPIEL ERSTELLEN',join:'BEITRETEN',leave:'VERLASSEN',edit:'PROFIL / SPRACHE',you:'DU',opp:'GEGNER',arena:'⚔️ MULTIPLAYER · 3 MINUTEN',mode:'MODUS WÄHLEN',wait:'Warte auf Gegner. Code teilen:',ready:'Zwei Spieler bereit. Start in 3 Sekunden!',offline:'Online benötigt Supabase-Konfiguration.',code:'Bitte 6-stelligen Code eingeben.',error:'Verbindung fehlgeschlagen.',winner:'DU GEWINNST!',loser:'GEGNER GEWINNT',draw:'UNENTSCHIEDEN',rot:'⟳ Mehrfach tippen für 360° Drehung.',ad:'WERBEPLATZ · Keine Anzeigen aktiviert',note:'Zwei Spielfelder. Höchste Punktzahl nach 3 Minuten gewinnt.',invalid:'Name mit 2–20 Zeichen eingeben.'},
+ fr:{intro:'Créez votre profil et choisissez une langue.',name:'Pseudo',country:'Pays',start:'JOUER',profile:'Profil enregistré sur cet appareil.',create:'CRÉER PARTIE',join:'REJOINDRE',leave:'QUITTER',edit:'PROFIL / LANGUE',you:'VOUS',opp:'ADVERSAIRE',arena:'⚔️ MULTIJOUEUR · 3 MINUTES',mode:'CHOISIR MODE',wait:'En attente. Partagez le code :',ready:'Deux joueurs prêts. Départ dans 3 secondes !',offline:'Le jeu en ligne nécessite Supabase.',code:'Saisissez un code de 6 caractères.',error:'Connexion impossible.',winner:'VICTOIRE !',loser:'DÉFAITE',draw:'ÉGALITÉ',rot:'⟳ Appuyez plusieurs fois pour tourner à 360°.',ad:'EMPLACEMENT PUBLICITAIRE · Désactivé',note:'Deux plateaux. Le meilleur score après 3 minutes gagne.',invalid:'Entrez un pseudo de 2 à 20 caractères.'},
+ es:{intro:'Crea tu perfil y elige un idioma.',name:'Jugador',country:'País',start:'EMPEZAR',profile:'El perfil se guarda en este dispositivo.',create:'CREAR PARTIDA',join:'UNIRSE',leave:'SALIR',edit:'PERFIL / IDIOMA',you:'TÚ',opp:'RIVAL',arena:'⚔️ MULTIJUGADOR · 3 MINUTOS',mode:'ELEGIR MODO',wait:'Esperando rival. Comparte el código:',ready:'Dos jugadores listos. Empieza en 3 segundos.',offline:'El modo online requiere Supabase.',code:'Introduce un código de 6 caracteres.',error:'Error de conexión.',winner:'¡GANASTE!',loser:'GANÓ TU RIVAL',draw:'EMPATE',rot:'⟳ Toca varias veces para girar 360°.',ad:'ESPACIO PUBLICITARIO · Sin anuncios',note:'Dos tableros. Gana quien tenga más puntos tras 3 minutos.',invalid:'Escribe un nombre de 2 a 20 caracteres.'},
+ pt:{intro:'Crie seu perfil e escolha o idioma.',name:'Jogador',country:'País',start:'COMEÇAR',profile:'O perfil fica salvo neste dispositivo.',create:'CRIAR PARTIDA',join:'ENTRAR',leave:'SAIR',edit:'PERFIL / IDIOMA',you:'VOCÊ',opp:'ADVERSÁRIO',arena:'⚔️ MULTIPLAYER · 3 MINUTOS',mode:'ESCOLHER MODO',wait:'Aguardando adversário. Código:',ready:'Dois jogadores prontos. Início em 3 segundos!',offline:'O modo online precisa do Supabase.',code:'Digite um código de 6 caracteres.',error:'Erro de conexão.',winner:'VOCÊ VENCEU!',loser:'ADVERSÁRIO VENCEU',draw:'EMPATE',rot:'⟳ Toque várias vezes para girar 360°.',ad:'ESPAÇO PUBLICITÁRIO · Sem anúncios',note:'Dois tabuleiros. Maior pontuação após 3 minutos vence.',invalid:'Digite um nome de 2 a 20 caracteres.'},
+ ja:{intro:'プロフィールと言語を選んでください。',name:'プレイヤー名',country:'国',start:'ゲーム開始',profile:'プロフィールはこの端末に保存されます。',create:'対戦を作成',join:'参加',leave:'退出',edit:'プロフィール / 言語',you:'あなた',opp:'対戦相手',arena:'⚔️ 対戦 · 3分',mode:'モード選択',wait:'対戦相手を待っています。コード:',ready:'2人揃いました。3秒後に開始！',offline:'オンライン対戦にはSupabase設定が必要です。',code:'6文字のコードを入力してください。',error:'接続できませんでした。',winner:'勝利！',loser:'敗北',draw:'引き分け',rot:'⟳ 何度も押すと360°回転します。',ad:'広告枠 · 広告は無効です',note:'別々の盤面で3分間対戦。高得点が勝ちです。',invalid:'2〜20文字の名前を入力してください。'}};
+function tr(k){return (translations[lang]||translations.en)[k]||translations.en[k]||k}
+function setText(id,s){$(id).textContent=s}
+function translate(){document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';const ids={themeTitle:'themeTitle',customImageLabel:'customImageLabel',clearImage:'clearImage',themeInfo:'themeInfo',setupIntro:'intro',nameLabel:'name',countryLabel:'country',profileNote:'profile',enterGame:'start',createRoom:'create',joinRoom:'join',leaveRoom:'leave',editProfile:'edit',youLabel:'you',opponentLabel:'opp',arenaTitle:'arena',chooseModeLabel:'mode',rotationHint:'rot',adSlot:'ad',multiplayerNote:'note'};Object.entries(ids).forEach(([id,key])=>setText(id,tr(key)));if(!match)setText('arenaStatus',tr('offline'));if(!translations[lang].themeTitle){setText('themeTitle',lang==='en'?'🎨 BOARD BACKGROUND':'🎨 SPILLEPLADENS BAGGRUND');setText('customImageLabel',lang==='en'?'Choose an image from your device':'Vælg billede fra din enhed');setText('clearImage',lang==='en'?'REMOVE IMAGE':'FJERN BILLEDE');setText('themeInfo',lang==='en'?'Free themes are available. Your photo is a private preview only. Paid uploads and public sharing require secure payments and moderation.':'Gratis temaer er klar. Eget billede er kun en privat forhåndsvisning. Betaling og offentlig deling kræver sikker opsætning.')}}
+try{profile=JSON.parse(localStorage.getItem('bbProfileV1')||'null')}catch(e){};
+if(profile){$('playerName').value=profile.name||'';$('country').value=profile.country||'DK';$('language').value=profile.lang||'da'}
+lang=$('language').value;translate();$('language').addEventListener('change',()=>{lang=$('language').value;translate()});
+function enter(){const name=$('playerName').value.trim();if(name.length<2||name.length>20){setText('setupError',tr('invalid'));return}lang=$('language').value;profile={name,country:$('country').value,lang};localStorage.setItem('bbProfileV1',JSON.stringify(profile));$('setup').classList.add('hidden');$('mainGame').classList.remove('hidden');setText('playerInfo',profile.name+' · '+profile.country);translate();reset()}
+$('enterGame').addEventListener('click',enter);$('editProfile').addEventListener('click',()=>{$('setup').classList.remove('hidden')});
+if(profile&&profile.name&&profile.name.length>=2)enter();
+function status(s){setText('arenaStatus',s)}
+const formats={'1v1':{size:2,teams:2},'1v1v1':{size:3,teams:3},'2v2':{size:4,teams:2},'3v3':{size:6,teams:2},'royale5':{size:5,teams:5},'royale10':{size:10,teams:10}};
+function isRoyale(){return battleFormat==='royale5'||battleFormat==='royale10'}
+window.bbAttackDockState=()=>!!(match&&matchStart&&!matchEnded&&!royaleEliminated&&isRoyale()&&document.getElementById('gameView')?.classList.contains('active'));
+function updateBattlePoints(){const el=$('bpCount');if(el)el.textContent=battlePoints;for(const [id,cost] of [['bpFreeze',100],['bpSlip',150]])$(id).disabled=!isRoyale()||!match||!matchStart||matchEnded||royaleEliminated||battlePoints<cost||Date.now()<attackCooldown}
+function spendBP(kind,cost){if(!isRoyale()||!match||!matchStart||matchEnded||royaleEliminated||battlePoints<cost||Date.now()<attackCooldown)return; battlePoints-=cost;attackCooldown=Date.now()+12000;wsSend('power',{kind});$('bpInfo').textContent='⚡ Angreb sendt! Vent 12 sekunder før næste angreb.';updateBattlePoints()}
+$('bpFreeze').addEventListener('click',()=>spendBP('freeze',100));$('bpSlip').addEventListener('click',()=>spendBP('slip',150));setInterval(updateBattlePoints,500);
+let battleFormat='1v1', lobby=null, searchId=null, searching=false, searchStarted=0, searchTimer=null, roster=[], matchToken=0;
+const mmText={da:{format:'VÆLG KAMPTYPE',search:'SØG EFTER MODSTANDERE',find:'FIND KAMP',cancel:'ANNULLER SØGNING',looking:'Søger efter spillere online…',waiting:'Venter på flere spillere',offline:'Start BLOCK BATTLE-serveren for at spille online.',free:'Alle spiltyper er gratis. Ingen køb.',friends:'👥 Google Play Games-venner og kontovenner kommer senere. Ingen butik og ingen betalinger.'},en:{format:'SELECT MATCH TYPE',search:'SEARCH FOR OPPONENTS',find:'FIND MATCH',cancel:'CANCEL SEARCH',looking:'Searching for players online…',waiting:'Waiting for more players',offline:'Start the BLOCK BATTLE server to play online.',free:'All game modes are free. No purchases.',friends:'👥 Google Play Games friends and account friends are planned for later. No purchases.'},de:{format:'SPIELTYP WÄHLEN',search:'GEGNER SUCHEN',find:'SPIEL SUCHEN',cancel:'SUCHE ABBRECHEN',looking:'Suche Spieler online…',waiting:'Warte auf weitere Spieler',offline:'Online-Suche benötigt Supabase.',free:'Alle Spielmodi sind kostenlos.',friends:'👥 Freundeslisten kommen später. Keine Käufe.'}};
+function mt(k){return (mmText[lang]||mmText.en)[k]||mmText.en[k]}
+function updateSearchLanguage(){setText('battleFormatLabel',mt('format'));setText('matchSearchTitle',mt('search'));setText('searchMatch',mt('find'));setText('cancelSearch',mt('cancel'));setText('searchNote',mt('free'));setText('friendNote',mt('friends'));if(searching)setText('searchText',mt('looking'))}
+$('language').addEventListener('change',()=>{lang=$('language').value;updateSearchLanguage()});
+$('enterGame').addEventListener('click',()=>setTimeout(updateSearchLanguage,0));
+$('battleFormat').addEventListener('change',async()=>{if(searching)await stopSearch();battleFormat=$('battleFormat').value;status(mt('free'))});
+function randomCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>chars[Math.floor(Math.random()*chars.length)]).join('')}
+function myId(){let id=sessionStorage.getItem('bbSessionId');if(!id){id=crypto.randomUUID();sessionStorage.setItem('bbSessionId',id)}return id}
+// Version 1.9: real WebSocket matchmaking on the bundled Node server.
+let socket=null, wsReady=null, wsManualClose=false;
+function serverUrl(){
+  const saved=(localStorage.getItem('bbOnlineServer')||'').trim();
+  if(saved){try{const u=new URL(saved);if(u.protocol!=='https:'&&u.protocol!=='http:')throw Error('invalid');return (u.protocol==='https:'?'wss://':'ws://')+u.host+'/ws'}catch(e){console.warn('Ugyldig serveradresse')}}
+  if(location.protocol==='capacitor:'||location.protocol==='file:'||location.hostname==='localhost'&&location.port==='')throw new Error('Indtast online-serverens HTTPS-adresse under Indstillinger');
+  return (location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws'
+}
+function wsSend(type,data={}){if(socket&&socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({type,...data}))}
+function send(type,data={}){if(type==='score')wsSend('score',{score:data.score,finished:!!data.finished});else if(type==='bye')wsSend('leave')}
+function teamIndex(i){return isRoyale()?i:formats[battleFormat].teams===3?i:i%2}
+function teamScore(t){return roster.filter((p,i)=>teamIndex(i)===t).reduce((a,p)=>a+(Number(p.score)||0),0)}
+function updateGroupScores(){if(!match)return;const sorted=roster.map((p,i)=>({...p,team:teamIndex(i)+1}));$('groupScores').textContent=isRoyale()?sorted.map(p=>`${p.eliminated?'☠️':'🟢'} ${p.name}: ${p.score||0}`).join(' · '):sorted.map(p=>`${p.name} (hold ${p.team}): ${p.score||0}`).join(' · ');setText('myArenaScore',String(score));setText('opponentScore',String(sorted.filter(p=>p.id!==myId()).reduce((a,p)=>a+(p.score||0),0)));if(formats[battleFormat].teams===2&&formats[battleFormat].size>2){const mine=sorted.find(p=>p.id===myId());if(mine)$('groupScores').textContent+=' | Hold '+mine.team+': '+teamScore(mine.team-1)+' · Modstanderhold: '+teamScore(1-(mine.team-1))}}
+function sendScore(){if(match&&matchStart){const self=roster.find(p=>p.id===myId());if(self)self.score=score;send('score',{score,finished:localFinished});updateGroupScores()}}
+let lastSent=0;setInterval(()=>{if(match&&matchStart&&!matchEnded&&Date.now()-lastSent>850){lastSent=Date.now();sendScore()}},900);
+function matchClock(){if(!matchStart)return;const remaining=Math.max(0,Math.ceil((matchStart+(isRoyale()?600000:180000)-Date.now())/1000));setText('arenaClock',String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0'));if(!remaining&&!matchEnded&&!isRoyale())finishMatch()}
+setInterval(matchClock,250);
+function startAt(start){if(matchStart)return;matchStart=start;battlePoints=0;attackCooldown=0;freezeUntil=0;slipUntil=0;royaleEliminated=false;$('battlePowers').classList.toggle('hidden',!isRoyale());updateBattlePoints();matchEnded=false;localFinished=false;bossChallenge=false;mode=isRoyale()?'speed':'classic';updateModeButtons();reset();running=false;status(tr('ready'));const token=matchToken;setTimeout(()=>{if(!match||matchEnded||token!==matchToken)return;running=true;lastTime=0;dropTimer=0;status('⚔️ '+battleFormat+' · LIVE');sendScore()},Math.max(0,start-Date.now()))}
+function finishMatch(){if(matchEnded)return;matchEnded=true;running=false;gameOver=true;updateDynamiteUI();sendScore();const selfIndex=roster.findIndex(p=>p.id===myId());const myTeam=teamIndex(Math.max(0,selfIndex));const myTotal=formats[battleFormat].size>3?teamScore(myTeam):score;const others=formats[battleFormat].size>3?roster.filter((p,i)=>teamIndex(i)!==myTeam).reduce((a,p)=>a+(p.score||0),0):Math.max(0,...roster.filter(p=>p.id!==myId()).map(p=>p.score||0));message=myTotal>others?tr('winner'):myTotal<others?tr('loser'):tr('draw');if(!isRoyale()&&window.bbRewardMatch)window.bbRewardMatch(myTotal>others?'win':myTotal<others?'loss':'draw');status(message+' · '+myTotal+' : '+others);draw()}
+function updateSearchUI(on){searching=on;$('searchProgress').classList.toggle('hidden',!on);$('searchMatch').classList.toggle('hidden',on);$('cancelSearch').classList.toggle('hidden',!on);$('battleFormat').disabled=on}
+function onServerMessage(m){
+ if(m.type==='chat'&&match&&m.code===match.code){
+  const line=document.createElement('div');line.style.padding='4px 0';line.textContent=(String(m.name||'Spiller').slice(0,28))+': '+String(m.text||'').slice(0,160);
+  $('chatMessages').appendChild(line);while($('chatMessages').children.length>50)$('chatMessages').firstChild.remove();$('chatMessages').scrollTop=$('chatMessages').scrollHeight;return;
+ }
+ if(m.type==='hello'){status('🟢 Online · klar til kamp');publishRanking();wsSend('leaderboard');return}
+ if(m.type==='leaderboard'){showRanking(m.players||[]);return}
+ if(m.type==='error'){status('⚠️ '+m.message);if(searching)updateSearchUI(false);return}
+ if(m.type==='searching'){setText('searchText',mt('looking')+' '+m.count+'/'+m.target);return}
+ if(m.type==='room'){$('chatMessages').textContent='💬 Kampchat er klar.';updateSearchUI(false);battleFormat=m.format;$('battleFormat').value=m.format;match={code:m.code,id:myId(),format:m.format};roster=m.players||[];$('battlePowers').classList.toggle('hidden',!isRoyale());$('roomCode').value=m.code;$('leaveRoom').classList.remove('hidden');$('shareRoomLink').classList.remove('hidden');$('shareRoomHint').classList.remove('hidden');updateGroupScores();status(mt('waiting')+': '+roster.length+'/'+formats[battleFormat].size+' · '+m.code);return}
+ if(m.type==='roster'){if(!match)return;roster=m.players;updateGroupScores();if(!matchStart)status(mt('waiting')+': '+roster.length+'/'+formats[battleFormat].size+' · '+match.code);return}
+ if(m.type==='start'){if(!match)return;roster=m.players;updateGroupScores();startAt(m.start);return}
+ if(m.type==='eliminated'){if(!match)return;const peer=roster.find(x=>x.id===m.id);if(peer)peer.eliminated=true;updateGroupScores();status('☠️ '+(peer?.name||'En spiller')+' er ude.');return}
+ if(m.type==='power'&&isRoyale()&&match&&!royaleEliminated){if(m.kind==='freeze')freezeUntil=Math.max(freezeUntil,Date.now()+2000);if(m.kind==='slip')slipUntil=Math.max(slipUntil,Date.now()+4000);status('⚡ Du blev ramt af '+(m.kind==='freeze'?'FRYS':'GLID')+'!');return}
+ if(m.type==='royaleWinner'){if(!match)return;matchEnded=true;running=false;gameOver=true;const won=m.id===myId();message=won?'👑 DU ER SIDSTE OVERLEVENDE!':'🏆 '+(m.name||'En spiller')+' vandt kampen!';if(window.bbRewardMatch)window.bbRewardMatch(won?'win':'loss');status(message);draw();return}
+ if(m.type==='score'){if(!match)return;const peer=roster.find(x=>x.id===m.id);if(peer){peer.score=m.score;updateGroupScores()}return}
+ if(m.type==='left'){if(matchStart&&!matchEnded)status('En spiller har forladt kampen.');return}
+ if(m.type==='ended'){if(!match)return;roster=m.players||roster;updateGroupScores();finishMatch();return}
+ if(m.type==='closed'){clearMatchState();status('Kampen er afsluttet. Find en ny kamp.');return}
+}
+$('chatForm').addEventListener('submit',e=>{e.preventDefault();const value=$('chatInput').value.trim();if(!value)return;if(!match||!socket||socket.readyState!==WebSocket.OPEN){status('Deltag i en onlinekamp for at chatte.');return}wsSend('chat',{text:value.slice(0,160)});$('chatInput').value=''});
+function connectSocket(){if(socket&&socket.readyState===WebSocket.OPEN)return Promise.resolve();if(wsReady)return wsReady;wsManualClose=false;wsReady=new Promise((resolve,reject)=>{let ws;try{ws=new WebSocket(serverUrl())}catch(e){wsReady=null;reject(e);return;}socket=ws;const timer=setTimeout(()=>{ws.close();reject(new Error('Forbindelsen tog for lang tid'))},9000);ws.onopen=()=>{clearTimeout(timer);wsSend('hello',{id:myId(),name:profile?.name||'Spiller',country:profile?.country||'DK'});resolve()};ws.onmessage=e=>{try{onServerMessage(JSON.parse(e.data))}catch(err){console.warn(err)}};ws.onerror=()=>{clearTimeout(timer);reject(new Error('Serveren er ikke tilgængelig'))};ws.onclose=()=>{clearTimeout(timer);socket=null;wsReady=null;if(!wsManualClose){updateSearchUI(false);if(match&&!matchEnded){running=false;status('🔴 Forbindelsen blev afbrudt. Genindlæs for at prøve igen.')}else status('🔴 Offline – prøv igen om lidt')}}});return wsReady}
+function clearMatchState(){matchToken++;match=null;roster=[];matchStart=0;matchEnded=false;localFinished=false;battlePoints=0;freezeUntil=0;slipUntil=0;$('battlePowers').classList.add('hidden');$('leaveRoom').classList.add('hidden');$('shareRoomLink').classList.add('hidden');$('shareRoomHint').classList.add('hidden');setText('opponentScore','—');setText('arenaClock',isRoyale()?'10:00':'03:00');$('groupScores').textContent='';reset()}
+async function leave(){wsSend('leave');clearMatchState();status(mt('free'))}
+async function connectRoom(code,host,format=battleFormat){try{await connectSocket();if(match)await leave();wsSend(host?'create':'join',{code,format});status('Forbinder til onlinekamp…')}catch(e){status('🔴 '+e.message+' · Start spillet via onlineadressen, ikke som en lokal fil.')}}
+async function stopSearch(){wsSend('cancel');updateSearchUI(false)}
+async function findMatch(){if(searching)return;try{await connectSocket();if(match)await leave();updateSearchUI(true);setText('searchText',mt('looking'));wsSend('search',{format:battleFormat});status('🔎 Søger efter spillere på serveren…')}catch(e){updateSearchUI(false);status('🔴 '+e.message+' · Serveren skal være startet.')}}
+async function joinFound(code,format){await stopSearch();await connectRoom(code,false,format)}
+$('shareRoomLink').addEventListener('click',async()=>{
+ if(!match)return;
+ const url=new URL(location.href);
+ url.search='';url.hash='';url.searchParams.set('room',match.code);
+ url.searchParams.set('format',match.format);
+ const link=url.toString();
+ try{
+  if(navigator.share){await navigator.share({title:'BLOCK BATTLE',text:'Kom og spil BLOCK BATTLE med mig!',url:link});return}
+  await navigator.clipboard.writeText(link);status('🔗 Link kopieret – send det til din ven!');
+ }catch(e){if(e.name==='AbortError')return;window.prompt('Kopiér invitationslinket:',link)}
+});
+$('searchMatch').addEventListener('click',findMatch);$('cancelSearch').addEventListener('click',async()=>{await stopSearch();status(mt('free'))});
+$('createRoom').addEventListener('click',()=>connectRoom(randomCode(),true));$('joinRoom').addEventListener('click',()=>{const code=$('roomCode').value.trim().toUpperCase();if(!/^[A-Z2-9]{6}$/.test(code)){status(tr('code'));return}connectRoom(code,false)});$('leaveRoom').addEventListener('click',async()=>{send('bye');await leave()});
+window.addEventListener('beforeunload',()=>{if(match)send('bye')});
+updateSearchLanguage();
+running=false;requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+/* Navigation layer: retains the v1.2 game engine and multiplayer code. */
+(()=>{
+ const $=id=>document.getElementById(id);
+ const legacy=$('legacyContent');
+ const take=(selector,target)=>{const n=legacy.querySelector(selector);if(n)$(target).appendChild(n);else console.warn('Missing menu component',selector)};
+ take('.arena','multiContent');take('.theme-picker','settingsContent');
+ take('#chooseModeLabel','modesContent');take('#modes','modesContent');take('#modeNote','modesContent');
+ take('#worldTheme','gameContent');take('.stats','gameContent');take('.dynamite-panel','gameContent');take('#stage','gameContent');
+ take('.boss','championContent');
+ // Move controls, help and advertising under the actual game screen.
+ [...legacy.querySelectorAll('.controls')].forEach(n=>$('gameContent').appendChild(n));
+ take('#rotationHint','gameContent');take('#adSlot','gameContent');take('#instructions','gameContent');
+ // Champion stays accessible through the mode menu, but does not clutter the board.
+ const champ=$('championContent').querySelector('.boss');if(champ){const wrap=document.createElement('div');wrap.id='championSection';champ.parentNode.insertBefore(wrap,champ);wrap.appendChild(champ)}
+ const arenaEdit=$('editProfile');if(arenaEdit)arenaEdit.classList.add('hidden');
+ legacy.remove();
+ let current='home';
+ const words={
+ da:{home:'Menu',account:'Konto',settings:'Indstillinger',play:'SPIL NU',multi:'MULTIPLAYER',modes:'VÆLG SPILTYPE',champion:'UDFORDR MESTEREN',language:'Sprog',languageHint:'Vælg sproget i spillet',edit:'REDIGER PROFIL',hello:'Velkommen tilbage',intro:'Vælg din kamp, og lad spillet begynde.',local:'Profilen gemmes på denne enhed. Online login er ikke aktiveret.'},
+ en:{home:'Menu',account:'Account',settings:'Settings',play:'PLAY NOW',multi:'MULTIPLAYER',modes:'GAME MODES',champion:'CHALLENGE THE CHAMPION',language:'Language',languageHint:'Choose your game language',edit:'EDIT PROFILE',hello:'Welcome back',intro:'Choose a match and start playing.',local:'Profile is stored on this device. Online login is not active.'},
+ de:{home:'Menü',account:'Konto',settings:'Einstellungen',play:'JETZT SPIELEN',multi:'MULTIPLAYER',modes:'SPIELMODI',champion:'CHAMPION HERAUSFORDERN',language:'Sprache',languageHint:'Spielsprache auswählen',edit:'PROFIL BEARBEITEN',hello:'Willkommen zurück',intro:'Wähle deinen Kampf und spiele los.',local:'Profil lokal gespeichert. Online-Anmeldung nicht aktiv.'},
+ fr:{home:'Menu',account:'Compte',settings:'Paramètres',play:'JOUER',multi:'MULTIJOUEUR',modes:'MODES DE JEU',champion:'DÉFIER LE CHAMPION',language:'Langue',languageHint:'Choisir la langue',edit:'MODIFIER LE PROFIL',hello:'Bon retour',intro:'Choisissez votre partie.',local:'Profil enregistré sur cet appareil. Connexion en ligne inactive.'},
+ es:{home:'Menú',account:'Cuenta',settings:'Ajustes',play:'JUGAR',multi:'MULTIJUGADOR',modes:'MODOS DE JUEGO',champion:'DESAFIAR AL CAMPEÓN',language:'Idioma',languageHint:'Elegir idioma',edit:'EDITAR PERFIL',hello:'Bienvenido',intro:'Elige una partida.',local:'Perfil guardado en este dispositivo. Sin inicio de sesión en línea.'},
+ pt:{home:'Menu',account:'Conta',settings:'Configurações',play:'JOGAR',multi:'MULTIJOGADOR',modes:'MODOS DE JOGO',champion:'DESAFIAR O CAMPEÃO',language:'Idioma',languageHint:'Escolha o idioma',edit:'EDITAR PERFIL',hello:'Bem-vindo',intro:'Escolha uma partida.',local:'Perfil salvo neste dispositivo. Login online indisponível.'},
+ ja:{home:'メニュー',account:'アカウント',settings:'設定',play:'プレイ',multi:'対戦',modes:'ゲームモード',champion:'王者に挑戦',language:'言語',languageHint:'言語を選択',edit:'プロフィール編集',hello:'おかえりなさい',intro:'対戦を選んで始めよう。',local:'プロフィールはこの端末に保存されます。オンラインログインは未対応。'}
+ };
+ function profile(){try{return JSON.parse(localStorage.getItem('bbProfileV1')||'null')}catch{return null}}
+ function currentLang(){return $('language').value||'da'}
+ function translateNav(){const p=profile(),l=currentLang(),w=words[l]||words.en;
+  document.querySelectorAll('[data-navtext]').forEach(el=>{el.textContent=w[el.dataset.navtext]||words.en[el.dataset.navtext]||el.textContent});
+  $('homeGreeting').textContent=(p?.name?w.hello+', '+p.name+'! ':'')+w.intro;
+  $('accountName').textContent=p?.name||'—';$('accountCountry').textContent=p?.country||'';$('accountLocal').textContent=w.local;
+  $('settingsLanguage').value=l;
+ }
+ window.addEventListener('bbNavigate',e=>go(e.detail));
+ function go(name){if(!$(name+'View'))return;current=name;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));translateNav();window.scrollTo({top:0,behavior:'instant'});}
+ $('homePlay').addEventListener('click',()=>window.bbShowPreRoll(()=>go('game')));
+ $('homeMulti').addEventListener('click',()=>window.bbShowPreRoll(()=>go('multi')));
+ $('homeModes').addEventListener('click',()=>{go('arcade');window.bbArcadeRefresh?.()});
+ $('homeArcade').addEventListener('click',()=>go('champion'));
+ $('modePlay').addEventListener('click',()=>window.bbShowPreRoll(()=>go('game')));
+ $('openChampion').addEventListener('click',()=>go('champion'));
+ document.querySelectorAll('[data-act="boss"]').forEach(b=>b.addEventListener('click',()=>window.bbShowPreRoll(()=>go('game'))));
+ $('topAccount').addEventListener('click',()=>go('account'));
+ $('topSettings').addEventListener('click',()=>go('settings'));
+ document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.back)));
+ $('accountEdit').addEventListener('click',()=>{$('setup').classList.remove('hidden')});
+ $('settingsLanguage').innerHTML=$('language').innerHTML;
+ $('settingsLanguage').addEventListener('change',()=>{$('language').value=$('settingsLanguage').value;$('language').dispatchEvent(new Event('change'));const p=profile();if(p){p.lang=$('language').value;localStorage.setItem('bbProfileV1',JSON.stringify(p))}translateNav()});
+ $('language').addEventListener('change',translateNav);
+ const invitation=new URLSearchParams(location.search);
+ const requestedRoom=(invitation.get('room')||'').toUpperCase();
+ const requestedFormat=invitation.get('format')||'1v1';
+ let inviteHandled=false;
+ function openInvitation(){
+  if(inviteHandled||!(/^[A-Z2-9]{6}$/.test(requestedRoom)))return;
+  if(!$('setup').classList.contains('hidden'))return;
+  inviteHandled=true;
+  go('multi');
+  $('roomCode').value=requestedRoom;
+  if([...$('battleFormat').options].some(o=>o.value===requestedFormat))$('battleFormat').value=requestedFormat;
+  $('joinRoom').click();
+  history.replaceState(null,'',location.pathname+location.hash);
+ }
+ $('enterGame').addEventListener('click',()=>setTimeout(()=>{if($('setup').classList.contains('hidden')){translateNav();go('home');openInvitation()}},0));
+ setTimeout(openInvitation,0);
+ // Navigate to the board when a multiplayer match actually starts.
+ const status=$('arenaStatus');if(status){new MutationObserver(()=>{if(status.textContent.includes('LIVE')&&current==='multi')go('game')}).observe(status,{childList:true,characterData:true,subtree:true})}
+ // Simple local progression: playing and winning earns XP, never purchases.
+ const PROGRESS_KEY='bbProgressV20';
+ function loadProgress(){try{return {...{played:0,wins:0,losses:0,draws:0,xp:0},...JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}')}}catch{return {played:0,wins:0,losses:0,draws:0,xp:0}}}
+ let progression=loadProgress();
+ function playerLevel(){return Math.floor(progression.xp/500)}
+ function refreshRanking(){
+  const lv=playerLevel();
+  $('topRankLevel').textContent='LV '+lv;
+  $('accountLevel').textContent='✦ LEVEL '+lv+' · '+progression.xp+' XP';
+  $('rankPlayed').textContent='Spillede kampe: '+progression.played;
+  $('rankWon').textContent='Vundne kampe: '+progression.wins;
+  $('rankLost').textContent='Tabte kampe: '+progression.losses;
+  $('rankDraw').textContent='Uafgjorte: '+progression.draws;
+  $('rankWinRate').textContent='Sejrsprocent: '+(progression.played?Math.round(progression.wins/progression.played*100):0)+' %';
+  $('rankStatus').textContent='Rang: '+(lv>=20?'Legende':lv>=12?'Mester':lv>=7?'Ekspert':lv>=3?'Udfordrer':'Nybegynder');
+ }
+ window.bbRewardMatch=function(result){
+  progression.played++;if(result==='win')progression.wins++;
+  else if(result==='loss')progression.losses++;
+  else progression.draws++;
+  const playedMs=Math.max(0,Math.min(Date.now()-matchStart,isRoyale()?600000:180000));
+  progression.xp+=Math.floor(playedMs/60000)*100;
+  localStorage.setItem(PROGRESS_KEY,JSON.stringify(progression));refreshRanking();publishRanking();wsSend('leaderboard');
+ };
+ refreshRanking();
+ // Public beta ranking. Testserver only, unverified player-reported XP.
+ function publishRanking(){
+  if(!socket||socket.readyState!==WebSocket.OPEN)return;
+  const p=profile||{};wsSend('ranking',{name:String(p.name||'Spiller').slice(0,28),country:String(p.country||'').slice(0,32),xp:progression.xp,played:progression.played,wins:progression.wins,losses:progression.losses});
+ }
+ function showRanking(players){
+  const el=$('worldLeaderboard');el.replaceChildren();
+  const myPosition=players?.findIndex(p=>p.id===myId())??-1;
+  $('topRankNumber').textContent=myPosition>=0?'#'+(myPosition+1):'#—';
+  if(!players?.length){el.textContent='Ingen spillere registreret på testserveren endnu.';return}
+  players.forEach((p,i)=>{const line=document.createElement('div');line.style.padding='9px 5px';line.style.borderBottom='1px solid #d5b86a44';line.textContent=(i+1)+'. '+p.name+' · '+(p.country||'🌍')+' · Level '+Math.floor(p.xp/500)+' · '+p.xp+' XP · '+p.wins+' sejre';el.appendChild(line)})
+ }
+ $('topRankBadge').addEventListener('click',()=>{$('homeLeaderboard').click()});
+ setInterval(()=>{if(socket?.readyState===WebSocket.OPEN){publishRanking();wsSend('leaderboard')}},30000);
+ $('homeLeaderboard').addEventListener('click',()=>{go('leaderboard');if(socket?.readyState===WebSocket.OPEN){publishRanking();wsSend('leaderboard')}else $('worldLeaderboard').textContent='Start multiplayerforbindelsen for at se online-ranglisten.'});
+ $('refreshLeaderboard').addEventListener('click',()=>{if(socket?.readyState===WebSocket.OPEN){publishRanking();wsSend('leaderboard')}});
+ // Keep the online scoreboard accessible from the multiplayer menu.
+ translateNav();go('home');
+})();
+document.getElementById('onlineServerUrl').value=localStorage.getItem('bbOnlineServer')||'';
+document.getElementById('saveOnlineServer').addEventListener('click',()=>{
+ const input=document.getElementById('onlineServerUrl');
+ const output=document.getElementById('onlineServerStatus');
+ const value=input.value.trim().replace(/\/+$/,'');
+ if(!value){localStorage.removeItem('bbOnlineServer');output.textContent='Serveradresse nulstillet.';return}
+ try{const u=new URL(value);if(u.protocol!=='https:'&&u.protocol!=='http:')throw Error('protocol');if(u.username||u.password||u.search||u.hash||u.pathname!=='/')throw Error('path');localStorage.setItem('bbOnlineServer',u.origin);output.textContent='Gemt. Multiplayer bruger nu denne server.'}catch(e){output.textContent='Brug en gyldig adresse som https://din-server.onrender.com'}
+});
+</script>
+
+<script>
+/* BLOCK BATTLE GOLD ARCADE 2.7: browser-only daily free demo. */
+(()=>{
+ const $=id=>document.getElementById(id),KEY='bbGoldArcadeV27';
+ const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+ const prizes=[{id:'shield',name:'🛡️ Skjoldpakke (test)'},{id:'rescue',name:'🧨 Redningspakke (test)'},{id:'fog',name:'🌫️ Tågepakke (test)'},{id:'gold',name:'✦ Guldstjerne (samleobjekt)'}];
+ function load(){let v={};try{v=JSON.parse(localStorage.getItem(KEY)||'{}')}catch{};if(v.day!==today())v={day:today(),used:0,inventory:{}};v.used=Math.min(10,Math.max(0,Number(v.used)||0));return v}
+ let data=load();
+ function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+ function refresh(){
+  data=load();save();
+  $('arcadeRemaining').textContent='🎟️ '+(10-data.used)+' / 10 GRATIS SPIL I DAG';
+  for(const id of ['arcadeTombola','arcadeClaw','arcadeWheel'])$(id).disabled=data.used>=10;
+  const inv=$('arcadeInventory');inv.replaceChildren();
+  let count=0;for(const prize of prizes){const n=data.inventory[prize.id]||0;if(n){const row=document.createElement('div');row.textContent=prize.name+' × '+n;inv.appendChild(row);count++}}
+  if(!count)inv.textContent='Ingen præmier endnu.';
+ }
+ function rand(n){const a=new Uint32Array(1);if(window.crypto?.getRandomValues)window.crypto.getRandomValues(a);else a[0]=Math.floor(Math.random()*4294967295);return a[0]%n}
+ function play(type){
+  data=load();if(data.used>=10){refresh();return}
+  data.used++;
+  let reward=null,description='';
+  if(type==='tombola'){reward=prizes[rand(prizes.length)];description='🎱 Guldkuglen gav: '+reward.name}
+  if(type==='wheel'){reward=prizes[rand(prizes.length)];description='🎡 Hjulet landede på: '+reward.name}
+  if(type==='claw'){
+   const pos=Number($('clawPosition').value),targets=[18,50,82],nearest=Math.min(...targets.map(t=>Math.abs(t-pos)));
+   if(nearest<=13 && rand(100)<75){reward=prizes[rand(prizes.length)];description='🕹️ Du greb en gave: '+reward.name}
+   else description='🕹️ Kloen missede! Prøv at placere den over en gave næste gang.'
+  }
+  if(reward)data.inventory[reward.id]=(data.inventory[reward.id]||0)+1;
+  save();$('arcadeResult').textContent=description;refresh()
+ }
+ $('arcadeTombola').addEventListener('click',()=>play('tombola'));
+ $('arcadeClaw').addEventListener('click',()=>play('claw'));
+ $('arcadeWheel').addEventListener('click',()=>play('wheel'));
+ window.bbArcadeRefresh=refresh;refresh()
+})();
+</script>
+<script>
+(()=>{
+ const $=id=>document.getElementById(id);
+ const dock=$('attackDock'),toggle=$('attackDockToggle');
+ toggle.addEventListener('click',()=>{
+  const collapsed=dock.classList.toggle('collapsed');
+  toggle.setAttribute('aria-expanded',String(!collapsed));
+ });
+ $('dockFreeze').addEventListener('click',()=>$('bpFreeze').click());
+ $('dockSlip').addEventListener('click',()=>$('bpSlip').click());
+ function sync(){
+  // Visible only while the Royale match is active; existing buttons enforce all rules.
+  const battleReady=!!window.bbAttackDockState?.();
+  dock.classList.toggle('hidden',!battleReady);
+  $('dockBP').textContent=$('bpCount').textContent+' BP';
+  for(const [dockId,originalId] of [['dockFreeze','bpFreeze'],['dockSlip','bpSlip']]){
+   $(dockId).disabled=$(originalId).disabled;
+  }
+  const feedback=$('bpInfo').textContent;
+  $('dockFeedback').textContent=feedback;
+  $('dockCooldown').textContent=$('bpFreeze').disabled&&$('bpSlip').disabled?'Optjen BP / vent':'Angreb klar';
+ }
+ setInterval(sync,500);sync();
+})();
+</script><script>
+(()=>{
+ const slots=Array.from({length:60},(_,i)=>({number:i+1,kind:i<40?'Virksomhed':i<52?'Kampagne':'Google Ads · reserve'}));
+ const grid=document.getElementById('sponsorGrid');
+ for(const slot of slots){const card=document.createElement('div');card.className='sponsor-tile';
+  const number=document.createElement('span');number.className='slot-id';number.textContent='PLADS '+String(slot.number).padStart(2,'0');
+  const title=document.createElement('strong');title.textContent=slot.kind;
+  const status=document.createElement('small');status.textContent='Ledig · ikke aktiv';
+  card.append(number,title,status);grid.appendChild(card);
+ }
+ document.getElementById('homeSponsors').addEventListener('click',()=>{
+  document.querySelectorAll('#mainGame .view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('sponsorsView').classList.add('active');
+ });
+})();
+</script><script>
+/* Optional sponsor film: local config, no ad tracking or third-party ad SDK. */
+(()=>{
+ const overlay=document.getElementById('preRollOverlay');
+ const video=document.getElementById('preRollVideo');
+ const countdown=document.getElementById('preRollCountdown');
+ const sponsor=document.getElementById('preRollSponsor');
+ const skip=document.getElementById('preRollSkip');
+ let busy=false;
+ window.bbShowPreRoll=async function(next){
+  if(busy)return;
+  busy=true;
+  let cfg;
+  try{
+   const response=await fetch('sponsor-videos.json',{cache:'no-store'});
+   if(response.ok)cfg=await response.json();
+  }catch{}
+  const items=Array.isArray(cfg?.videos)?cfg.videos:[];
+  // Only same-origin, locally hosted MP4/WebM files. No arbitrary external links.
+  const eligible=items.filter(x=>x?.enabled===true&&typeof x.src==='string'&&/^ads\/[a-zA-Z0-9_./-]+\.(mp4|webm)$/.test(x.src)&&!x.src.includes('..'));
+  if(!eligible.length){busy=false;next();return}
+  const item=eligible[Math.floor(Math.random()*eligible.length)];
+  let finished=false,clock,timeout;
+  function done(){
+   if(finished)return;finished=true;
+   clearInterval(clock);clearTimeout(timeout);
+   video.pause();video.removeAttribute('src');video.load();
+   overlay.classList.add('hidden');overlay.setAttribute('aria-hidden','true');
+   skip.removeEventListener('click',done);video.removeEventListener('ended',done);video.removeEventListener('error',done);
+   busy=false;next();
+  }
+  sponsor.textContent=String(item.sponsor||'Sponsor').slice(0,60);
+  overlay.classList.remove('hidden');overlay.setAttribute('aria-hidden','false');
+  skip.addEventListener('click',done);video.addEventListener('ended',done);video.addEventListener('error',done);
+  const end=Date.now()+10000;
+  function tick(){countdown.textContent='Maks. '+Math.max(0,Math.ceil((end-Date.now())/1000))+' sek.'}
+  tick();clock=setInterval(tick,200);timeout=setTimeout(done,10000);
+  video.src=item.src;
+  try{await video.play()}catch{done()}
+ };
+})();
+</script></body>
+</html>
